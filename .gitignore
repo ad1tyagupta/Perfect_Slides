@@ -1,0 +1,23 @@
+# Reference decks are usually confidential. Keep the source files local and
+# commit only the design rules you extract from them into references/.
+templates/*
+!templates/README.md
+
+# Working files. Decks the tool builds land here; they are the user's output,
+# not part of the tool.
+work/
+.perfect-slides/
+sources.json
+ingested.json
+shots/
+*.offline.html
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db

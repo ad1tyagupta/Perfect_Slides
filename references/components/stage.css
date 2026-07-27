@@ -1,0 +1,278 @@
+/* ===========================================================================
+   FIXED 16:9 STAGE — include this entire file in every HTML deck.
+
+   Slides are authored at 1920x1080 and the whole stage scales to the window.
+   Content never reflows. A deck looks identical on a laptop, a projector and
+   a phone, only smaller.
+   =========================================================================== */
+
+/* 1. Lock the window ------------------------------------------------------ */
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* 2. Full-window viewport ------------------------------------------------- */
+.deck-viewport {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+
+/* 3. The design canvas. JS sets transform: translate(...) scale(...). ------ */
+.deck-stage {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    transform-origin: 0 0;
+    background: var(--slide-bg, #fff);
+}
+
+/* 4. Slides stack inside the stage.
+
+   Visibility is controlled by visibility/opacity/pointer-events, NEVER by
+   display. A later rule such as .slide-content { display: flex } would
+   override display:none and show every slide at once. This is the single
+   most common way a deck breaks.
+   ------------------------------------------------------------------------- */
+.slide {
+    position: absolute;
+    inset: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    background: var(--slide-bg, #fff);
+}
+
+.slide.active,
+.slide.visible {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 1;
+}
+
+/* 5. Media stays inside authored bounds ----------------------------------- */
+img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+
+/* 6. Staggered reveal.
+
+   Set the delay per element with style="--d:.2" (seconds). Preferred over
+   nth-child rules because the order stays visible in the markup.
+   ------------------------------------------------------------------------- */
+.reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity var(--dur, .7s) var(--ease, cubic-bezier(.16, 1, .3, 1)),
+                transform var(--dur, .7s) var(--ease, cubic-bezier(.16, 1, .3, 1));
+    transition-delay: calc(var(--d, 0) * 1s);
+}
+
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+
+/* Variants. Same delay convention. */
+.reveal-scale { opacity: 0; transform: scale(.94); }
+.slide.visible .reveal-scale { opacity: 1; transform: scale(1); }
+
+.reveal-left { opacity: 0; transform: translateX(-44px); }
+.slide.visible .reveal-left { opacity: 1; transform: translateX(0); }
+
+.reveal-blur { opacity: 0; filter: blur(12px); }
+.slide.visible .reveal-blur { opacity: 1; filter: blur(0); }
+
+.reveal-scale, .reveal-left, .reveal-blur {
+    transition: opacity var(--dur, .7s) var(--ease, cubic-bezier(.16, 1, .3, 1)),
+                transform var(--dur, .7s) var(--ease, cubic-bezier(.16, 1, .3, 1)),
+                filter var(--dur, .7s) var(--ease, cubic-bezier(.16, 1, .3, 1));
+    transition-delay: calc(var(--d, 0) * 1s);
+}
+
+/* 7. Chrome lives outside the slide design system ------------------------- */
+.deck-controls {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 9px 16px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, .62);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, .14);
+    color: #fff;
+    font: 500 15px/1 system-ui, sans-serif;
+    user-select: none;
+}
+
+.deck-controls button {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .14);
+    color: inherit;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s;
+}
+
+.deck-controls button:hover { background: var(--accent, #fff); color: #000; }
+.deck-controls button:focus-visible { outline: 2px solid var(--accent, #fff); outline-offset: 2px; }
+.deck-controls .count { min-width: 54px; text-align: center; letter-spacing: .06em; }
+
+.deck-progress {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 4px;
+    width: 0;
+    z-index: 1000;
+    background: var(--accent, #fff);
+    transition: width .35s var(--ease, cubic-bezier(.16, 1, .3, 1));
+}
+
+/* Presenting: hide the chrome, reveal briefly on mouse move. */
+body.presenting .deck-controls {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .45s ease;
+}
+
+body.presenting.show-chrome .deck-controls { opacity: 1; pointer-events: auto; }
+
+/* 8. Speaker notes. Hidden in the deck, read by presenter view and export. - */
+.speaker-notes { display: none; }
+
+/* 9. Inline editing.
+
+   Visibility of the toggle is controlled by JS classes only. Do NOT drive it
+   with a CSS sibling selector: pointer-events:none breaks the hover chain the
+   moment the cursor leaves the hotzone on its way to the button.
+   ------------------------------------------------------------------------- */
+.edit-hotzone {
+    position: fixed;
+    top: 0; left: 0;
+    width: 80px; height: 80px;
+    z-index: 10000;
+}
+
+.edit-toggle {
+    position: fixed;
+    top: 18px; left: 18px;
+    width: 42px; height: 42px;
+    z-index: 10001;
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, .62);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    font-size: 17px;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s ease;
+}
+
+.edit-toggle.show,
+.edit-toggle.active { opacity: 1; pointer-events: auto; }
+
+.edit-bar {
+    position: fixed;
+    left: 50%; bottom: 84px;
+    transform: translateX(-50%);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, .16);
+    background: rgba(0, 0, 0, .82);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    font: 500 15px/1 system-ui, sans-serif;
+}
+
+.edit-bar button {
+    padding: 9px 14px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, .14);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.edit-bar button:hover { background: rgba(255, 255, 255, .26); }
+
+body.editing [contenteditable] {
+    outline: 1px dashed rgba(127, 127, 127, .55);
+    outline-offset: 4px;
+    cursor: text;
+}
+
+body.editing [contenteditable]:focus {
+    outline: 2px solid var(--accent, #4af);
+    outline-offset: 4px;
+}
+
+/* Editing chrome never appears while presenting or in print. */
+body.presenting .edit-toggle,
+body.presenting .edit-hotzone { display: none; }
+
+/* 10. Print: one slide per page, drives PDF export ------------------------ */
+@media print {
+    html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+    .deck-viewport { position: static; overflow: visible; background: #fff; }
+    .deck-stage { position: static; width: auto; height: auto; transform: none !important; background: none; }
+
+    .slide {
+        position: relative;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        width: 1920px;
+        height: 1080px;
+        break-after: page;
+        page-break-after: always;
+    }
+
+    .slide:last-child { break-after: auto; page-break-after: auto; }
+
+    /* Reveals must be resolved or the PDF prints blank slides. */
+    .reveal, .reveal-scale, .reveal-left, .reveal-blur {
+        opacity: 1 !important;
+        transform: none !important;
+        filter: none !important;
+    }
+
+    .deck-controls, .deck-progress,
+    .edit-toggle, .edit-hotzone, .edit-bar { display: none !important; }
+}
+
+/* 11. Reduced motion ------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .2s !important;
+    }
+}

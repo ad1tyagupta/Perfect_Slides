@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout recovery · Quarterly review</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Karla:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+/* === THEME · Night Ride ================================================== */
+:root {
+    --bg: #0E2635; --bg2: #123448; --stage-bg: #081B26; --slide-bg: #0E2635;
+    --ink: #EAF4F8; --muted: #8FB2C0; --accent: #00A8D8;
+    --accent-soft: rgba(0,168,216,.16); --on-accent: #062130;
+    --panel: rgba(255,255,255,.05); --panel-line: rgba(255,255,255,.12);
+    --panel-strong: linear-gradient(160deg, #0A7D99, #18425A);
+
+    --chart-1: var(--accent);
+    --chart-2: rgba(255,255,255,.40);
+    --chart-3: rgba(255,255,255,.24);
+    --chart-grid: rgba(255,255,255,.10);
+    --chart-label: var(--muted);
+
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'Karla', system-ui, sans-serif;
+    --ease: cubic-bezier(.16, 1, .3, 1);
+    --dur: .7s;
+}
+
+/* ===========================================================================
+   FIXED 16:9 STAGE — include this entire file in every HTML deck.
+
+   Slides are authored at 1920x1080 and the whole stage scales to the window.
+   Content never reflows. A deck looks identical on a laptop, a projector and
+   a phone, only smaller.
+   =========================================================================== */
+
+/* 1. Lock the window ------------------------------------------------------ */
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* 2. Full-window viewport ------------------------------------------------- */
+.deck-viewport {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+
+/* 3. The design canvas. JS sets transform: translate(...) scale(...). ------ */
+.deck-stage {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    transform-origin: 0 0;
+    background: var(--slide-bg, #fff);
+}
+
+/* 4. Slides stack inside the stage.
+
+   Visibility is controlled by visibility/opacity/pointer-events, NEVER by
+   display. A later rule such as .slide-content { display: flex } would
+   override display:none and show every slide at once. This is the single
+   most common way a deck breaks.
+   ------------------------------------------------------------------------- */
+.slide {
+    position: absolute;
+    inset: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    background: var(--slide-bg, #fff);
+}
+
+.slide.active,
+.slide.visible {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 1;
+}
+
+/* 5. Media stays inside authored bounds ----------------------------------- */
+img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+
+/* 6. Staggered reveal.
+
+   Set the delay per element with style="--d:.2" (seconds). Preferred over
+   nth-child rules because the order stays visible in the markup.
+   ------------------------------------------------------------------------- */
+.reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity var(--dur, .7s) var(--ease, cubic-bezier(.16, 1, .3, 1)),
+                transform var(--dur, .7s) var(--ease, cubic-bezier(.16, 1, .3, 1));
+    transition-delay: calc(var(--d, 0) * 1s);
+}
+
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+
+/* Variants. Same delay convention. */
+.reveal-scale { opacity: 0; transform: scale(.94); }
+.slide.visible .reveal-scale { opacity: 1; transform: scale(1); }
+
+.reveal-left { opacity: 0; transform: translateX(-44px); }
+.slide.visible .reveal-left { opacity: 1; transform: translateX(0); }
+
+.reveal-blur { opacity: 0; filter: blur(12px); }
+.slide.visible .reveal-blur { opacity: 1; filter: blur(0); }
+
+.reveal-scale, .reveal-left, .reveal-blur {
+    transition: opacity var(--dur, .7s) var(--ease, cubic-bezier(.16, 1, .3, 1)),
+                transform var(--dur, .7s) var(--ease, cubic-bezier(.16, 1, .3, 1)),
+                filter var(--dur, .7s) var(--ease, cubic-bezier(.16, 1, .3, 1));
+    transition-delay: calc(var(--d, 0) * 1s);
+}
+
+/* 7. Chrome lives outside the slide design system ------------------------- */
+.deck-controls {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 9px 16px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, .62);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, .14);
+    color: #fff;
+    font: 500 15px/1 system-ui, sans-serif;
+    user-select: none;
+}
+
+.deck-controls button {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .14);
+    color: inherit;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s;
+}
+
+.deck-controls button:hover { background: var(--accent, #fff); color: #000; }
+.deck-controls button:focus-visible { outline: 2px solid var(--accent, #fff); outline-offset: 2px; }
+.deck-controls .count { min-width: 54px; text-align: center; letter-spacing: .06em; }
+
+.deck-progress {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 4px;
+    width: 0;
+    z-index: 1000;
+    background: var(--accent, #fff);
+    transition: width .35s var(--ease, cubic-bezier(.16, 1, .3, 1));
+}
+
+/* Presenting: hide the chrome, reveal briefly on mouse move. */
+body.presenting .deck-controls {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .45s ease;
+}
+
+body.presenting.show-chrome .deck-controls { opacity: 1; pointer-events: auto; }
+
+/* 8. Speaker notes. Hidden in the deck, read by presenter view and export. - */
+.speaker-notes { display: none; }
+
+/* 9. Inline editing.
+
+   Visibility of the toggle is controlled by JS classes only. Do NOT drive it
+   with a CSS sibling selector: pointer-events:none breaks the hover chain the
+   moment the cursor leaves the hotzone on its way to the button.
+   ------------------------------------------------------------------------- */
+.edit-hotzone {
+    position: fixed;
+    top: 0; left: 0;
+    width: 80px; height: 80px;
+    z-index: 10000;
+}
+
+.edit-toggle {
+    position: fixed;
+    top: 18px; left: 18px;
+    width: 42px; height: 42px;
+    z-index: 10001;
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, .62);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    font-size: 17px;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s ease;
+}
+
+.edit-toggle.show,
+.edit-toggle.active { opacity: 1; pointer-events: auto; }
+
+.edit-bar {
+    position: fixed;
+    left: 50%; bottom: 84px;
+    transform: translateX(-50%);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, .16);
+    background: rgba(0, 0, 0, .82);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    font: 500 15px/1 system-ui, sans-serif;
+}
+
+.edit-bar button {
+    padding: 9px 14px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, .14);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.edit-bar button:hover { background: rgba(255, 255, 255, .26); }
+
+body.editing [contenteditable] {
+    outline: 1px dashed rgba(127, 127, 127, .55);
+    outline-offset: 4px;
+    cursor: text;
+}
+
+body.editing [contenteditable]:focus {
+    outline: 2px solid var(--accent, #4af);
+    outline-offset: 4px;
+}
+
+/* Editing chrome never appears while presenting or in print. */
+body.presenting .edit-toggle,
+body.presenting .edit-hotzone { display: none; }
+
+/* 10. Print: one slide per page, drives PDF export ------------------------ */
+@media print {
+    html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+    .deck-viewport { position: static; overflow: visible; background: #fff; }
+    .deck-stage { position: static; width: auto; height: auto; transform: none !important; background: none; }
+
+    .slide {
+        position: relative;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        width: 1920px;
+        height: 1080px;
+        break-after: page;
+        page-break-after: always;
+    }
+
+    .slide:last-child { break-after: auto; page-break-after: auto; }
+
+    /* Reveals must be resolved or the PDF prints blank slides. */
+    .reveal, .reveal-scale, .reveal-left, .reveal-blur {
+        opacity: 1 !important;
+        transform: none !important;
+        filter: none !important;
+    }
+
+    .deck-controls, .deck-progress,
+    .edit-toggle, .edit-hotzone, .edit-bar { display: none !important; }
+}
+
+/* 11. Reduced motion ------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .2s !important;
+    }
+}
+
+/* === SHARED FURNITURE ==================================================== */
+.deck-stage { background: linear-gradient(150deg, var(--bg) 0%, var(--bg2) 100%); }
+
+/* Type goes on .slide, not only .slide-inner. Source lines and footers sit
+   directly on the slide and would otherwise fall back to Times. */
+.slide { background: linear-gradient(150deg, var(--bg) 0%, var(--bg2) 100%);
+         font-family: var(--font-body); color: var(--ink); }
+
+/* Head takes its natural height, content fills the rest. Stops a slide
+   leaving a dead band across the bottom. */
+.slide-inner { position: absolute; inset: 0; padding: 64px 92px;
+               font-family: var(--font-body); color: var(--ink);
+               display: flex; flex-direction: column; }
+.slide-inner > .s-head { flex: none; }
+.slide-inner > *:not(.s-head) { flex: 1; min-height: 0; align-content: center; }
+
+.s-head { display: flex; align-items: baseline; gap: 26px; margin-bottom: 40px; }
+.s-num { font: italic 400 30px var(--font-display); color: var(--accent); }
+.s-title { font: 600 58px/1 var(--font-display); color: #fff; letter-spacing: -.01em; }
+.s-title em { font-style: italic; color: var(--accent); }
+.kicker { font: 700 20px var(--font-body); letter-spacing: .2em;
+          text-transform: uppercase; color: var(--accent); }
+
+/* Route motif — one idea, repeated, in a different position each slide */
+.path-motif { position: absolute; inset: 0; pointer-events: none; opacity: .3; }
+.path-motif path { fill: none; stroke: var(--accent); stroke-width: 3;
+                   stroke-dasharray: 14 16; stroke-dashoffset: 900; }
+.path-motif circle { fill: var(--accent); }
+.slide.visible .path-motif path { animation: draw-path 2.4s var(--ease) forwards; }
+@keyframes draw-path { to { stroke-dashoffset: 0; } }
+
+/* === 1 · TITLE =========================================================== */
+.t-wrap { position: absolute; inset: 0; padding: 0 110px;
+          display: flex; flex-direction: column; justify-content: center; }
+.t-main { font: 600 132px/.98 var(--font-display); color: #fff;
+          letter-spacing: -.02em; margin-top: 30px; max-width: 1400px; }
+.t-main em { font-style: italic; color: var(--accent); display: block; }
+.t-sub { font-size: 28px; color: var(--muted); margin-top: 36px;
+         max-width: 720px; line-height: 1.5; }
+.t-foot { position: absolute; left: 110px; bottom: 60px;
+          font-size: 22px; color: var(--ink); opacity: .9; }
+
+/* === 2 · STATEMENT ======================================================= */
+.statement { position: absolute; inset: 0; display: flex; align-items: center;
+             padding: 0 130px; }
+.statement .rule { width: 8px; height: 220px; background: var(--accent);
+                   margin-right: 52px; flex: none; }
+.statement p { font: 600 76px/1.18 var(--font-display); color: #fff; max-width: 1400px; }
+.statement b { color: var(--accent); font-weight: 600; }
+
+/* === 3 · STATS =========================================================== */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 60px;
+         align-content: center; }
+.stat { border-left: 3px solid var(--accent); padding-left: 34px; }
+.stat-value { font: 600 122px/1 var(--font-display); color: #fff;
+              font-variant-numeric: tabular-nums; }
+.stat-value small { font-size: 60px; color: var(--accent); }
+.stat-label { font-size: 24px; color: var(--muted); margin-top: 14px; line-height: 1.35; }
+
+/* === 4 · LINE CHART ====================================================== */
+.chart-wrap { display: grid; grid-template-columns: 1fr 460px; gap: 70px; align-items: center; }
+.line-chart { width: 100%; }
+.line-chart .grid { stroke: var(--chart-grid); stroke-width: 1; }
+.line-chart .trend { fill: none; stroke: var(--chart-1); stroke-width: 5;
+                     stroke-linecap: round; stroke-linejoin: round;
+                     stroke-dasharray: 1000; stroke-dashoffset: 1000; }
+.slide.visible .line-chart .trend { animation: draw 1.8s var(--ease) .3s forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.line-chart .node { fill: var(--chart-1); opacity: 0; }
+.slide.visible .line-chart .node { animation: pop .4s var(--ease) 1.9s forwards; }
+@keyframes pop { from { opacity: 0 } to { opacity: 1 } }
+.line-chart .marker { stroke: var(--muted); stroke-width: 2; stroke-dasharray: 6 6; }
+.line-chart text { font-family: var(--font-body); }
+.line-chart .lbl { font-size: 22px; fill: var(--chart-label); text-anchor: middle; }
+.line-chart .peak { font-size: 30px; font-weight: 700; fill: #fff; text-anchor: middle; }
+.line-chart .note { font-size: 20px; fill: var(--muted); }
+.aside { font-size: 26px; line-height: 1.5; color: var(--muted); }
+.aside b { color: var(--accent); }
+
+/* === 5 · BARS ============================================================ */
+.bars { width: 100%; }
+.bars .axis { stroke: var(--chart-grid); stroke-width: 2; }
+.bars rect { fill: var(--chart-3); transform-origin: center bottom; transform: scaleY(0); }
+.bars .lead rect { fill: var(--chart-1); }
+.slide.visible .bars rect { transform: scaleY(1);
+    transition: transform .9s var(--ease); transition-delay: calc(var(--d,0) * 1s); }
+.bars text { text-anchor: middle; font-family: var(--font-body); }
+.bars .v { font-size: 26px; font-weight: 700; fill: #fff; }
+.bars .l { font-size: 22px; fill: var(--chart-label); }
+
+/* === 6 · DONUT =========================================================== */
+.split { display: grid; grid-template-columns: 460px 1fr; gap: 90px; align-items: center; }
+.donut { position: relative; width: 420px; height: 420px; }
+.donut svg { transform: rotate(-90deg); overflow: visible; }
+.donut .seg { fill: none; stroke-width: 46; cursor: pointer;
+              pointer-events: visibleStroke;
+              transition: stroke-width .25s var(--ease), opacity .25s; }
+.donut .seg:nth-of-type(1) { stroke: var(--chart-1); }
+.donut .seg:nth-of-type(2) { stroke: var(--chart-2); }
+.donut .seg:nth-of-type(3) { stroke: var(--chart-3); }
+.donut.hovering .seg { opacity: .3; }
+.donut.hovering .seg:hover { opacity: 1; stroke-width: 60; }
+.donut-centre { position: absolute; inset: 0; pointer-events: none; display: flex;
+                flex-direction: column; align-items: center; justify-content: center; }
+.donut-centre .big { font: 600 64px/1 var(--font-display); color: #fff; }
+.donut-centre .sub { font-size: 22px; color: var(--muted); margin-top: 10px; }
+.legend { display: flex; flex-direction: column; gap: 20px; }
+.legend span { display: flex; align-items: center; gap: 16px; font-size: 26px; color: var(--ink); }
+.legend i { width: 18px; height: 18px; border-radius: 5px; flex: none; }
+.hint { font-size: 20px; color: var(--muted); margin-top: 30px; }
+.hint i { font-style: normal; color: var(--accent); }
+
+/* === 7 · FLIP CARDS ======================================================
+   Faces are absolutely positioned and add no height, so the grid must
+   stretch its rows or every card collapses. */
+.flip-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px;
+             align-content: stretch !important; grid-auto-rows: minmax(0, 1fr);
+             max-height: 640px; margin: auto 0; }
+.flip { perspective: 1400px; cursor: pointer; }
+.flip-inner { position: relative; width: 100%; height: 100%;
+              transform-style: preserve-3d; transition: transform .7s var(--ease); }
+.flip.flipped .flip-inner { transform: rotateY(180deg); }
+.flip:focus-visible { outline: 3px solid var(--accent); outline-offset: 5px; }
+.face { position: absolute; inset: 0; backface-visibility: hidden;
+        -webkit-backface-visibility: hidden; border-radius: 20px;
+        padding: 40px 38px; display: flex; flex-direction: column; }
+.face.front { background: var(--panel); border: 1px solid var(--panel-line);
+              justify-content: space-between; }
+.face.back { background: var(--panel-strong); transform: rotateY(180deg);
+             justify-content: center; }
+.face .idx { font: italic 400 76px/1 var(--font-display); color: var(--accent-soft); }
+.face .ft { font: 600 36px/1.15 var(--font-display); color: #fff; }
+.face .flip-hint { font: 700 18px var(--font-body); letter-spacing: .14em;
+                   text-transform: uppercase; color: var(--accent); margin-top: 18px; }
+.face .bl { font: 700 18px var(--font-body); letter-spacing: .16em;
+            text-transform: uppercase; color: rgba(255,255,255,.72); margin-bottom: 16px; }
+.face .bc { font: 400 25px/1.45 var(--font-body); color: #fff; }
+
+/* === 8 · TIMELINE ======================================================== */
+.timeline { position: relative; height: 300px; flex: none !important; margin: auto 0; }
+.timeline .line { position: absolute; left: 3%; right: 3%; top: 60px;
+                  border-top: 4px dashed rgba(0,168,216,.5); }
+.tl-stop { position: absolute; top: 0; width: 26%; transform: translateX(-50%);
+           text-align: center; }
+.tl-stop .dot { width: 26px; height: 26px; border-radius: 50%; background: var(--bg);
+                border: 5px solid var(--accent); margin: 48px auto 0; position: relative; z-index: 2; }
+.tl-stop.end .dot { background: var(--accent);
+                    box-shadow: 0 0 0 10px rgba(0,168,216,.18), 0 0 30px rgba(0,168,216,.6); }
+.tl-stop .w { font: 700 20px var(--font-body); letter-spacing: .08em;
+              color: var(--accent); margin-top: 24px; }
+.tl-stop .t { font: 600 30px var(--font-display); color: #fff; margin-top: 8px; }
+.tl-stop .s { font-size: 20px; color: var(--muted); margin-top: 8px; line-height: 1.35; }
+
+/* === 9 · CLOSE =========================================================== */
+.close { position: absolute; inset: 0; display: flex; flex-direction: column;
+         justify-content: center; padding: 0 130px; }
+.close h2 { font: 600 128px/1 var(--font-display); color: #fff;
+            letter-spacing: -.02em; margin-top: 28px; }
+.close h2 em { font-style: italic; color: var(--accent); }
+.close .ask { font-size: 30px; color: var(--muted); margin-top: 40px; max-width: 900px;
+              line-height: 1.5; }
+
+.source { position: absolute; left: 92px; bottom: 40px; font-size: 19px;
+          color: var(--muted); opacity: .75; }
+</style>
+</head>
+<body>
+
+<div class="deck-progress"></div>
+
+<div class="deck-viewport">
+  <main class="deck-stage" id="deckStage">
+
+    <!-- ===== 1 · TITLE ===== -->
+    <section class="slide active">
+      <svg class="path-motif" viewBox="0 0 1920 1080" preserveAspectRatio="none">
+        <path d="M -40 880 C 300 780, 520 1010, 860 930 S 1500 700, 1980 820" pathLength="900"/>
+        <circle cx="300" cy="843" r="9"/><circle cx="860" cy="930" r="9"/>
+      </svg>
+      <div class="t-wrap">
+        <div class="kicker reveal" style="--d:.05">Quarterly review · July 2026</div>
+        <h1 class="t-main reveal" style="--d:.15">Checkout is where<em>the revenue leaks</em></h1>
+        <p class="t-sub reveal" style="--d:.3">Three fixes recover more than a quarter
+           of what we spend on acquisition.</p>
+      </div>
+      <div class="t-foot reveal" style="--d:.45">Aditya Gupta</div>
+      <div class="speaker-notes">Open with the number, not the background. They know the background.</div>
+    </section>
+
+    <!-- ===== 2 · STATEMENT ===== -->
+    <section class="slide">
+      <div class="statement">
+        <div class="rule reveal" style="--d:.05"></div>
+        <p class="reveal" style="--d:.15">We lose <b>8% of carts</b> to a bug we
+           have known about since March.</p>
+      </div>
+      <div class="source">Source: internal checkout logs, Mar to Jun 2026. n = 4,812.</div>
+      <div class="speaker-notes">Pause here. Let it land before moving on.</div>
+    </section>
+
+    <!-- ===== 3 · STATS ===== -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="s-head reveal"><span class="s-num">01</span>
+          <h2 class="s-title">The problem, <em>in three numbers</em></h2></div>
+        <div class="stats">
+          <div class="stat reveal" style="--d:.1">
+            <div class="stat-value"><span data-count="8.1" data-dec="1">0</span><small>%</small></div>
+            <div class="stat-label">of carts abandoned at the payment step</div>
+          </div>
+          <div class="stat reveal" style="--d:.2">
+            <div class="stat-value"><small>€</small><span data-count="142" data-sep="1">0</span><small>k</small></div>
+            <div class="stat-label">annualised revenue at risk</div>
+          </div>
+          <div class="stat reveal" style="--d:.3">
+            <div class="stat-value"><span data-count="11">0</span></div>
+            <div class="stat-label">median days to fix a Safari bug today</div>
+          </div>
+        </div>
+      </div>
+      <div class="source">Source: internal checkout logs, Mar to Jun 2026.</div>
+    </section>
+
+    <!-- ===== 4 · LINE CHART ===== -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="s-head reveal"><span class="s-num">02</span>
+          <h2 class="s-title">Abandonment rose <em>every month since March</em></h2></div>
+        <div class="chart-wrap">
+          <svg class="line-chart reveal" style="--d:.15" viewBox="0 0 1000 470">
+            <line class="grid" x1="40" y1="120" x2="960" y2="120"/>
+            <line class="grid" x1="40" y1="250" x2="960" y2="250"/>
+            <line class="grid" x1="40" y1="380" x2="960" y2="380"/>
+            <line class="marker" x1="400" y1="60" x2="400" y2="400"/>
+            <text class="note" x="412" y="78">March release</text>
+            <path class="trend" d="M 70 372 L 235 376 L 400 300 L 565 232 L 730 178 L 895 120" pathLength="1000"/>
+            <circle class="node" cx="895" cy="120" r="10"/>
+            <text class="peak" x="895" y="96">8.1%</text>
+            <text class="lbl" x="70"  y="430">Jan</text>
+            <text class="lbl" x="235" y="430">Feb</text>
+            <text class="lbl" x="400" y="430">Mar</text>
+            <text class="lbl" x="565" y="430">Apr</text>
+            <text class="lbl" x="730" y="430">May</text>
+            <text class="lbl" x="895" y="430">Jun</text>
+          </svg>
+          <div class="aside reveal" style="--d:.35">
+            The line turns the month we shipped the new payment handler.
+            Nothing else changed. <b>This is not seasonal.</b>
+          </div>
+        </div>
+      </div>
+      <div class="source">Source: checkout logs. Release shipped 12 March 2026.</div>
+      <div class="speaker-notes">Point at the dashed line. That is the release date.</div>
+    </section>
+
+    <!-- ===== 5 · BARS ===== -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="s-head reveal"><span class="s-num">03</span>
+          <h2 class="s-title">Safari carries <em>almost all of the loss</em></h2></div>
+        <svg class="bars reveal" style="--d:.15" viewBox="0 0 1000 470">
+          <line class="axis" x1="30" y1="400" x2="970" y2="400"/>
+          <g class="bar lead" style="--d:.2">
+            <rect x="90" y="80" width="150" height="320" rx="6"/>
+            <text class="v" x="165" y="62">3,980</text>
+            <text class="l" x="165" y="436">Safari</text>
+          </g>
+          <g class="bar" style="--d:.32">
+            <rect x="320" y="367" width="150" height="33" rx="6"/>
+            <text class="v" x="395" y="349">410</text>
+            <text class="l" x="395" y="436">Chrome</text>
+          </g>
+          <g class="bar" style="--d:.44">
+            <rect x="550" y="385" width="150" height="15" rx="6"/>
+            <text class="v" x="625" y="367">190</text>
+            <text class="l" x="625" y="436">Firefox</text>
+          </g>
+          <g class="bar" style="--d:.56">
+            <rect x="780" y="393" width="150" height="7" rx="6"/>
+            <text class="v" x="855" y="375">90</text>
+            <text class="l" x="855" y="436">Edge</text>
+          </g>
+        </svg>
+      </div>
+      <div class="source">Source: checkout logs, June 2026. Abandoned carts by browser.</div>
+    </section>
+
+    <!-- ===== 6 · DONUT ===== -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="s-head reveal"><span class="s-num">04</span>
+          <h2 class="s-title">Where the <em>three weeks</em> go</h2></div>
+        <div class="split">
+          <div class="donut reveal" style="--d:.15" data-chart-hover>
+            <svg viewBox="0 0 200 200">
+              <circle class="seg" data-value="50%" data-label="Payment iframe"
+                      cx="100" cy="100" r="80" stroke-dasharray="251 251" stroke-dashoffset="0"/>
+              <circle class="seg" data-value="30%" data-label="Session retry"
+                      cx="100" cy="100" r="80" stroke-dasharray="151 351" stroke-dashoffset="-251"/>
+              <circle class="seg" data-value="20%" data-label="Error surface"
+                      cx="100" cy="100" r="80" stroke-dasharray="100 402" stroke-dashoffset="-402"/>
+            </svg>
+            <div class="donut-centre">
+              <div class="big" data-readout-value>3 weeks</div>
+              <div class="sub" data-readout-label>one engineer</div>
+            </div>
+          </div>
+          <div class="reveal" style="--d:.3">
+            <div class="legend">
+              <span><i style="background:var(--chart-1)"></i>Payment iframe · replace the deprecated handler</span>
+              <span><i style="background:var(--chart-2)"></i>Session retry · recover the cart when the token expires</span>
+              <span><i style="background:var(--chart-3)"></i>Error surface · show the failure instead of a blank screen</span>
+            </div>
+            <div class="hint"><i>&#9679;</i> Hover a segment for its share</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 7 · FLIP CARDS ===== -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="s-head reveal"><span class="s-num">05</span>
+          <h2 class="s-title">Three fixes, <em>in shipping order</em></h2></div>
+        <div class="flip-grid">
+          <div class="flip reveal" style="--d:.1">
+            <div class="flip-inner">
+              <div class="face front"><div class="idx">01</div>
+                <div><div class="ft">Payment iframe</div>
+                <div class="flip-hint">Click for detail</div></div></div>
+              <div class="face back"><div class="bl">What changes</div>
+                <div class="bc">Swap the deprecated Safari handler for the current
+                  SDK. Recovers most of the 3,980 lost carts on its own.</div></div>
+            </div>
+          </div>
+          <div class="flip reveal" style="--d:.2">
+            <div class="flip-inner">
+              <div class="face front"><div class="idx">02</div>
+                <div><div class="ft">Session retry</div>
+                <div class="flip-hint">Click for detail</div></div></div>
+              <div class="face back"><div class="bl">What changes</div>
+                <div class="bc">Hold the cart when the token expires instead of
+                  dropping it. Customers stop losing their basket mid-payment.</div></div>
+            </div>
+          </div>
+          <div class="flip reveal" style="--d:.3">
+            <div class="flip-inner">
+              <div class="face front"><div class="idx">03</div>
+                <div><div class="ft">Error surface</div>
+                <div class="flip-hint">Click for detail</div></div></div>
+              <div class="face back"><div class="bl">What changes</div>
+                <div class="bc">Show the actual failure and a retry button.
+                  Today the screen goes blank and people leave.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="speaker-notes">Flip the first card. The others follow the same shape.</div>
+    </section>
+
+    <!-- ===== 8 · TIMELINE ===== -->
+    <section class="slide">
+      <svg class="path-motif" viewBox="0 0 1920 1080" preserveAspectRatio="none">
+        <path d="M -40 200 C 400 320, 700 120, 1100 240 S 1700 400, 1980 260" pathLength="900"/>
+      </svg>
+      <div class="slide-inner">
+        <div class="s-head reveal"><span class="s-num">06</span>
+          <h2 class="s-title">Three weeks to <em>full recovery</em></h2></div>
+        <div class="timeline reveal" style="--d:.2">
+          <div class="line"></div>
+          <div class="tl-stop" style="left:16%"><div class="dot"></div>
+            <div class="w">WEEK 1</div><div class="t">Payment iframe</div>
+            <div class="s">Ship behind a flag, verify on Safari</div></div>
+          <div class="tl-stop" style="left:50%"><div class="dot"></div>
+            <div class="w">WEEK 2</div><div class="t">Session retry</div>
+            <div class="s">Cart persistence across token refresh</div></div>
+          <div class="tl-stop end" style="left:84%"><div class="dot"></div>
+            <div class="w">WEEK 3</div><div class="t">Error surface</div>
+            <div class="s">Then monitor for a full week</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 9 · THE ASK ===== -->
+    <section class="slide">
+      <div class="close">
+        <div class="kicker reveal" style="--d:.05">What we need today</div>
+        <h2 class="reveal" style="--d:.15">Three weeks,<em>one engineer</em></h2>
+        <p class="ask reveal" style="--d:.3">Hold the autumn campaign until the fix
+           ships. Spending on acquisition while checkout leaks costs us twice.</p>
+      </div>
+      <div class="speaker-notes">Ask plainly. Do not soften it. Then stop talking.</div>
+    </section>
+
+  </main>
+</div>
+
+<div class="edit-hotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Edit text (E)">&#9998;</button>
+
+<nav class="deck-controls" aria-label="Slide navigation">
+  <button data-nav="prev" aria-label="Previous slide">&#8249;</button>
+  <span class="count">1 / 9</span>
+  <button data-nav="next" aria-label="Next slide">&#8250;</button>
+  <button data-nav="fullscreen" aria-label="Fullscreen">&#9974;</button>
+</nav>
+
+<script>
+/* ===========================================================================
+   DECK CONTROLLER — include this entire file in every HTML deck.
+
+   Navigation, stage scaling, presenting mode, presenter view, and the
+   behaviours shared by every component (counters, flips, tabs).
+   No dependencies.
+   =========================================================================== */
+
+class Deck {
+    constructor() {
+        this.slides = [...document.querySelectorAll('.slide')];
+        this.stage = document.getElementById('deckStage');
+        this.progress = document.querySelector('.deck-progress');
+        this.current = 0;
+        this.presenterWindow = null;
+
+        this.scale();
+        addEventListener('resize', () => this.scale());
+
+        this.bindKeys();
+        this.bindTouch();
+        this.bindWheel();
+        this.bindChrome();
+        this.bindFullscreen();
+
+        // Deep link: deck.html#7 opens on slide 7.
+        const fromHash = parseInt(location.hash.slice(1), 10);
+        this.show(Number.isInteger(fromHash) ? fromHash - 1 : 0);
+    }
+
+    /* --- Scale the 1920x1080 stage to fit the window, letterboxing ------- */
+    scale() {
+        const f = Math.min(innerWidth / 1920, innerHeight / 1080);
+        const x = (innerWidth - 1920 * f) / 2;
+        const y = (innerHeight - 1080 * f) / 2;
+        this.stage.style.transform = `translate(${x}px, ${y}px) scale(${f})`;
+    }
+
+    /* --- Slide switching ------------------------------------------------- */
+    show(i) {
+        this.current = Math.max(0, Math.min(i, this.slides.length - 1));
+
+        this.slides.forEach((s, n) => {
+            const on = n === this.current;
+            s.classList.toggle('active', on);
+            s.classList.toggle('visible', on);
+            s.setAttribute('aria-hidden', String(!on));
+        });
+
+        const counter = document.querySelector('.deck-controls .count');
+        if (counter) counter.textContent = `${this.current + 1} / ${this.slides.length}`;
+
+        if (this.progress) {
+            this.progress.style.width = ((this.current + 1) / this.slides.length * 100) + '%';
+        }
+
+        history.replaceState(null, '', '#' + (this.current + 1));
+
+        this.runCounters(this.slides[this.current]);
+        this.replayAnimations(this.slides[this.current]);
+        this.pushToPresenter();
+    }
+
+    next() { this.show(this.current + 1); }
+    prev() { this.show(this.current - 1); }
+
+    /* --- Numbers that count up on arrival --------------------------------
+       <span data-count="53.6" data-dec="1">0</span>
+       data-dec  decimal places, default 0
+       data-sep  set to "1" for thousands separators
+       --------------------------------------------------------------------- */
+    runCounters(slide) {
+        slide.querySelectorAll('[data-count]').forEach(el => {
+            const target = parseFloat(el.dataset.count);
+            const dec = parseInt(el.dataset.dec || 0, 10);
+            const sep = el.dataset.sep === '1';
+            const dur = parseInt(el.dataset.dur || 1300, 10);
+            const t0 = performance.now();
+
+            const tick = t => {
+                const p = Math.min((t - t0) / dur, 1);
+                const eased = 1 - Math.pow(1 - p, 3);
+                const v = (target * eased).toFixed(dec);
+                el.textContent = sep ? Number(v).toLocaleString(undefined, {
+                    minimumFractionDigits: dec, maximumFractionDigits: dec
+                }) : v;
+                if (p < 1) requestAnimationFrame(tick);
+            };
+
+            requestAnimationFrame(tick);
+        });
+    }
+
+    /* --- Restart keyframe animations when a slide is revisited ----------- */
+    replayAnimations(slide) {
+        slide.querySelectorAll('[data-replay]').forEach(el => {
+            el.style.animation = 'none';
+            void el.offsetWidth;          // force reflow
+            el.style.animation = '';
+        });
+    }
+
+    /* --- Input ------------------------------------------------------------ */
+    bindKeys() {
+        addEventListener('keydown', e => {
+            if (e.target.isContentEditable || /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+
+            if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(e.key)) {
+                e.preventDefault(); this.next();
+            } else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) {
+                e.preventDefault(); this.prev();
+            } else if (e.key === 'Home') {
+                e.preventDefault(); this.show(0);
+            } else if (e.key === 'End') {
+                e.preventDefault(); this.show(this.slides.length - 1);
+            } else if (e.key === 'f' || e.key === 'F') {
+                e.preventDefault(); this.toggleFullscreen();
+            } else if (e.key === 'p' || e.key === 'P') {
+                e.preventDefault(); this.openPresenter();
+            }
+        });
+    }
+
+    bindTouch() {
+        let x0 = null, y0 = null;
+
+        addEventListener('touchstart', e => {
+            x0 = e.touches[0].clientX;
+            y0 = e.touches[0].clientY;
+        }, { passive: true });
+
+        addEventListener('touchend', e => {
+            if (x0 === null) return;
+            const dx = e.changedTouches[0].clientX - x0;
+            const dy = e.changedTouches[0].clientY - y0;
+            // Horizontal intent only, so vertical scrolling inside a slide still works.
+            if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+                dx < 0 ? this.next() : this.prev();
+            }
+            x0 = y0 = null;
+        }, { passive: true });
+    }
+
+    bindWheel() {
+        let lock = false;
+        addEventListener('wheel', e => {
+            if (lock) return;
+            if (Math.abs(e.deltaY) < 24 && Math.abs(e.deltaX) < 24) return;
+            lock = true;
+            (e.deltaY || e.deltaX) > 0 ? this.next() : this.prev();
+            setTimeout(() => lock = false, 650);
+        }, { passive: true });
+    }
+
+    bindChrome() {
+        const prev = document.querySelector('[data-nav="prev"]');
+        const next = document.querySelector('[data-nav="next"]');
+        const full = document.querySelector('[data-nav="fullscreen"]');
+        if (prev) prev.onclick = () => this.prev();
+        if (next) next.onclick = () => this.next();
+        if (full) full.onclick = () => this.toggleFullscreen();
+    }
+
+    /* --- Presenting mode: fullscreen, chrome hides after 2.5s idle -------- */
+    bindFullscreen() {
+        let timer = null;
+
+        const poke = () => {
+            document.body.classList.add('show-chrome');
+            clearTimeout(timer);
+            timer = setTimeout(() => document.body.classList.remove('show-chrome'), 2500);
+        };
+
+        const onChange = () => {
+            const on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+            document.body.classList.toggle('presenting', on);
+            this.scale();
+            on ? poke() : document.body.classList.remove('show-chrome');
+        };
+
+        document.addEventListener('fullscreenchange', onChange);
+        document.addEventListener('webkitfullscreenchange', onChange);
+        addEventListener('mousemove', () => {
+            if (document.body.classList.contains('presenting')) poke();
+        });
+    }
+
+    toggleFullscreen() {
+        const el = document.documentElement;
+        const isFull = document.fullscreenElement || document.webkitFullscreenElement;
+        try {
+            const fn = isFull
+                ? (document.exitFullscreen || document.webkitExitFullscreen)
+                : (el.requestFullscreen || el.webkitRequestFullscreen);
+            const p = fn && fn.call(isFull ? document : el);
+            if (p && p.catch) p.catch(() => {});
+        } catch (_) { /* fullscreen unavailable, not fatal */ }
+    }
+
+    /* --- Presenter view: notes, next slide and a timer in a second window -
+       Press P. Put it on the laptop screen, the deck on the projector.
+       --------------------------------------------------------------------- */
+    openPresenter() {
+        if (this.presenterWindow && !this.presenterWindow.closed) {
+            this.presenterWindow.focus();
+            return;
+        }
+
+        this.presenterWindow = open('', 'presenter', 'width=900,height=620');
+        if (!this.presenterWindow) return;   // popup blocked
+
+        this.presenterWindow.document.write(`<!DOCTYPE html><meta charset="utf-8">
+<title>Presenter view</title>
+<style>
+  body{margin:0;padding:28px;background:#111;color:#eee;
+       font:16px/1.55 system-ui,sans-serif;display:grid;gap:22px;
+       grid-template-rows:auto auto 1fr}
+  .row{display:flex;justify-content:space-between;align-items:baseline;
+       border-bottom:1px solid #333;padding-bottom:12px}
+  .pos{font-size:15px;color:#888;letter-spacing:.06em}
+  .timer{font-size:34px;font-variant-numeric:tabular-nums}
+  h2{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:#888;
+     font-weight:600;margin-bottom:8px}
+  .notes{font-size:19px;white-space:pre-wrap}
+  .next{color:#aaa;font-size:17px}
+</style>
+<div class="row"><span class="pos" id="pos"></span><span class="timer" id="timer">00:00</span></div>
+<div><h2>Notes</h2><div class="notes" id="notes"></div></div>
+<div><h2>Up next</h2><div class="next" id="next"></div></div>
+<script>
+  const t0 = Date.now();
+  setInterval(() => {
+    const s = Math.floor((Date.now() - t0) / 1000);
+    document.getElementById('timer').textContent =
+      String(Math.floor(s / 60)).padStart(2,'0') + ':' + String(s % 60).padStart(2,'0');
+  }, 1000);
+<\/script>`);
+        this.presenterWindow.document.close();
+        this.pushToPresenter();
+    }
+
+    pushToPresenter() {
+        const w = this.presenterWindow;
+        if (!w || w.closed || !w.document.getElementById('pos')) return;
+
+        const notesEl = this.slides[this.current].querySelector('.speaker-notes');
+        const nextSlide = this.slides[this.current + 1];
+        const nextHead = nextSlide && nextSlide.querySelector('h1, h2, .headline');
+
+        w.document.getElementById('pos').textContent =
+            `Slide ${this.current + 1} of ${this.slides.length}`;
+        w.document.getElementById('notes').textContent =
+            notesEl ? notesEl.textContent.trim() : 'No notes for this slide.';
+        w.document.getElementById('next').textContent =
+            nextHead ? nextHead.textContent.trim() : 'End of deck.';
+    }
+}
+
+/* ===========================================================================
+   SHARED COMPONENT BEHAVIOUR
+   Markup conventions live in references/components/interactive.md
+   =========================================================================== */
+
+/* Flip cards: <div class="flip"><div class="flip-inner">…</div></div> */
+function bindFlipCards() {
+    document.querySelectorAll('.flip').forEach(card => {
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('role', 'button');
+
+        const toggle = () => card.classList.toggle('flipped');
+        card.addEventListener('click', toggle);
+        card.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+        });
+    });
+}
+
+/* Tab switchers: buttons carry data-tab="x", panels carry data-panel="x".
+   Scoped per .tab-group so several can coexist on one slide. */
+function bindTabs() {
+    document.querySelectorAll('.tab-group').forEach(group => {
+        const tabs = [...group.querySelectorAll('[data-tab]')];
+        const panels = [...group.querySelectorAll('[data-panel]')];
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => {
+                    const on = t === tab;
+                    t.classList.toggle('on', on);
+                    t.setAttribute('aria-selected', String(on));
+                });
+                panels.forEach(p => p.classList.toggle('on', p.dataset.panel === tab.dataset.tab));
+            });
+        });
+    });
+}
+
+/* Charts with hoverable segments. The centre readout swaps to the hovered
+   segment's value and returns to the default on leave. */
+function bindChartHovers() {
+    document.querySelectorAll('[data-chart-hover]').forEach(chart => {
+        const big = chart.querySelector('[data-readout-value]');
+        const sub = chart.querySelector('[data-readout-label]');
+        if (!big || !sub) return;
+
+        const rest = { big: big.innerHTML, sub: sub.innerHTML };
+
+        chart.querySelectorAll('[data-value]').forEach(seg => {
+            seg.addEventListener('mouseenter', () => {
+                chart.classList.add('hovering');
+                big.textContent = seg.dataset.value;
+                sub.textContent = seg.dataset.label || '';
+            });
+            seg.addEventListener('mouseleave', () => {
+                chart.classList.remove('hovering');
+                big.innerHTML = rest.big;
+                sub.innerHTML = rest.sub;
+            });
+        });
+    });
+}
+
+/* Carousels: <div class="carousel" data-carousel> with [data-carousel-item],
+   [data-carousel-prev], [data-carousel-next], [data-carousel-dots] */
+function bindCarousels() {
+    document.querySelectorAll('[data-carousel]').forEach(car => {
+        const items = [...car.querySelectorAll('[data-carousel-item]')];
+        const dots = car.querySelector('[data-carousel-dots]');
+        if (!items.length) return;
+        let i = 0;
+
+        if (dots && !dots.children.length) {
+            items.forEach(() => dots.appendChild(document.createElement('i')));
+        }
+
+        const render = () => {
+            items.forEach((el, n) => el.classList.toggle('on', n === i));
+            if (dots) [...dots.children].forEach((d, n) => d.classList.toggle('on', n === i));
+        };
+
+        const go = step => { i = (i + step + items.length) % items.length; render(); };
+
+        const prev = car.querySelector('[data-carousel-prev]');
+        const next = car.querySelector('[data-carousel-next]');
+        if (prev) prev.onclick = () => go(-1);
+        if (next) next.onclick = () => go(1);
+
+        render();
+    });
+}
+
+/* ===========================================================================
+   INLINE EDITING
+
+   Press E, or hover the top-left corner, to edit text directly in the deck.
+   Changes save to this browser automatically. "Save a copy" downloads an HTML
+   file with the edits baked in.
+
+   Purpose: fixing a typo or rewording a headline should not cost a round trip
+   back to the agent.
+   =========================================================================== */
+
+class Editor {
+    constructor(deck) {
+        this.deck = deck;
+        this.active = false;
+        this.key = 'deck-edits:' + location.pathname;
+
+        this.toggle = document.getElementById('editToggle');
+        this.hotzone = document.querySelector('.edit-hotzone');
+
+        this.index();
+        this.restore();
+        this.bind();
+    }
+
+    /* Stable ids so saved edits survive a reload. Index within the slide, so
+       adding a slide later does not shift everything.
+
+       A field is an element whose children are only inline formatting. Headlines
+       routinely carry <em> or <b> for emphasis, and excluding them would make
+       the most important text on the deck the only text you cannot edit. */
+    index() {
+        const SELECTOR = 'h1,h2,h3,h4,p,li,blockquote,td,th,figcaption,div,span';
+        const INLINE = new Set(['EM', 'B', 'STRONG', 'I', 'U', 'SMALL', 'SPAN',
+                                'BR', 'SUB', 'SUP', 'MARK', 'CODE', 'ABBR']);
+        this.fields = [];
+
+        const inlineOnly = el =>
+            [...el.children].every(c => INLINE.has(c.tagName) && inlineOnly(c));
+
+        this.deck.slides.forEach((slide, s) => {
+            let n = 0;
+            slide.querySelectorAll(SELECTOR).forEach(el => {
+                if (!(el.textContent || '').trim()) return;
+                if (el.closest('.speaker-notes, .deck-controls')) return;
+                if (el.querySelector('[data-count]') || el.hasAttribute('data-count')) return;
+                if (!inlineOnly(el)) return;                    // has block children
+                if (el.closest('[data-edit-id]')) return;       // already inside a field
+                el.dataset.editId = `s${s}-f${n++}`;
+                el.dataset.editRich = el.children.length ? '1' : '';
+                this.fields.push(el);
+            });
+        });
+    }
+
+    bind() {
+        if (this.toggle) this.toggle.addEventListener('click', () => this.flip());
+
+        // Hover reveal needs JS with a grace period. A CSS sibling selector
+        // fails here: pointer-events:none on the button breaks the hover chain
+        // the moment the cursor leaves the hotzone heading for the button.
+        if (this.hotzone && this.toggle) {
+            let hideTimer = null;
+            const show = () => { clearTimeout(hideTimer); this.toggle.classList.add('show'); };
+            const hide = () => {
+                hideTimer = setTimeout(() => {
+                    if (!this.active) this.toggle.classList.remove('show');
+                }, 400);
+            };
+            this.hotzone.addEventListener('mouseenter', show);
+            this.hotzone.addEventListener('mouseleave', hide);
+            this.toggle.addEventListener('mouseenter', show);
+            this.toggle.addEventListener('mouseleave', hide);
+        }
+
+        addEventListener('keydown', e => {
+            if ((e.key === 'e' || e.key === 'E') && !e.target.isContentEditable) {
+                e.preventDefault();
+                this.flip();
+            }
+            if (e.key === 'Escape' && this.active) this.flip();
+            if (this.active && (e.metaKey || e.ctrlKey) && e.key === 's') {
+                e.preventDefault();
+                this.download();
+            }
+        });
+    }
+
+    flip() { this.active ? this.stop() : this.start(); }
+
+    start() {
+        this.active = true;
+        document.body.classList.add('editing');
+        if (this.toggle) { this.toggle.classList.add('show', 'active'); this.toggle.textContent = '✕'; }
+
+        this.fields.forEach(el => {
+            // Rich fields keep their <em>/<b>; plain ones are locked to text so
+            // a paste cannot inject markup into the slide.
+            el.setAttribute('contenteditable', el.dataset.editRich ? 'true' : 'plaintext-only');
+            el.addEventListener('input', this.save);
+        });
+
+        this.bar = document.createElement('div');
+        this.bar.className = 'edit-bar';
+        this.bar.innerHTML = '<span>Click any text to edit</span>' +
+            '<button data-edit="save">Save a copy</button>' +
+            '<button data-edit="reset">Undo all</button>' +
+            '<button data-edit="done">Done</button>';
+        document.body.appendChild(this.bar);
+
+        this.bar.addEventListener('click', e => {
+            const what = e.target.dataset.edit;
+            if (what === 'save') this.download();
+            if (what === 'reset') this.reset();
+            if (what === 'done') this.stop();
+        });
+    }
+
+    stop() {
+        this.active = false;
+        document.body.classList.remove('editing');
+        if (this.toggle) { this.toggle.classList.remove('active'); this.toggle.textContent = '✎'; }
+
+        this.fields.forEach(el => {
+            el.removeAttribute('contenteditable');
+            el.removeEventListener('input', this.save);
+        });
+
+        if (this.bar) { this.bar.remove(); this.bar = null; }
+    }
+
+    save = () => {
+        const edits = {};
+        this.fields.forEach(el => {
+            edits[el.dataset.editId] = el.dataset.editRich ? el.innerHTML : el.textContent;
+        });
+        try {
+            localStorage.setItem(this.key, JSON.stringify(edits));
+        } catch (_) {
+            // Private browsing, or storage full. Editing still works for this
+            // session; "Save a copy" is the way out.
+            this.warnNoStorage();
+        }
+    };
+
+    warnNoStorage() {
+        if (this.warned || !this.bar) return;
+        this.warned = true;
+        this.bar.querySelector('span').textContent =
+            'This browser will not save edits. Use "Save a copy" before closing.';
+    }
+
+    restore() {
+        let edits;
+        try { edits = JSON.parse(localStorage.getItem(this.key) || '{}'); } catch (_) { return; }
+        this.fields.forEach(el => {
+            const saved = edits[el.dataset.editId];
+            if (saved === undefined) return;
+            if (el.dataset.editRich) {
+                if (saved !== el.innerHTML) el.innerHTML = saved;
+            } else if (saved !== el.textContent) {
+                el.textContent = saved;
+            }
+        });
+    }
+
+    reset() {
+        try { localStorage.removeItem(this.key); } catch (_) {}
+        location.reload();
+    }
+
+    /* Writes out the live DOM, minus editing chrome, so the downloaded file is
+       a clean deck with the edits baked in. */
+    download() {
+        const clone = document.documentElement.cloneNode(true);
+        clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+        clone.querySelectorAll('.edit-bar').forEach(el => el.remove());
+        clone.querySelectorAll('.slide').forEach(el => {
+            el.classList.remove('visible');
+            el.style.visibility = '';
+        });
+        const first = clone.querySelector('.slide');
+        if (first) first.classList.add('active');
+
+        const html = '<!DOCTYPE html>\n' + clone.outerHTML;
+        const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+        const a = document.createElement('a');
+        const name = (location.pathname.split('/').pop() || 'deck.html').replace(/\.html?$/, '');
+        a.href = url;
+        a.download = `${name}-edited.html`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+}
+
+/* --- Boot ---------------------------------------------------------------- */
+const deck = new Deck();
+bindFlipCards();
+bindTabs();
+bindChartHovers();
+bindCarousels();
+const editor = new Editor(deck);
+</script>
+</body>
+</html>

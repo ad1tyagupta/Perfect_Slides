@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "usage": "Pick two or three candidates from this index, then read only those entries in presets.md. Render three title-slide previews and let the user choose by looking. Never ask someone to describe an aesthetic in words.",
+  "rules": [
+    "Always offer three genuinely different previews, not three shades of one idea.",
+    "If the output format is PowerPoint or Both, only offer presets where pptx_safe is true.",
+    "If the venue is a projector, prefer scheme 'light'. Dark decks wash out.",
+    "Never render the preset name, 'Option A', or any workflow label on the slide itself. A preview must look like a real first slide.",
+    "A preset is a starting point. Adapt the palette to the user's brand when they have one."
+  ],
+  "presets": [
+    {
+      "slug": "night-ride",
+      "name": "Night Ride",
+      "tagline": "Deep navy canvas, one electric accent, editorial serif against geometric sans.",
+      "scheme": "dark",
+      "formality": "medium",
+      "density": "medium",
+      "mood": ["confident", "modern", "energetic"],
+      "best_for": "Campaign work, product pitches, anything presented on a good screen where a dark deck can be cinematic.",
+      "avoid_for": "Bad projectors, printed handouts, conservative institutional audiences.",
+      "pptx_safe": true
+    },
+    {
+      "slug": "signal-brief",
+      "name": "Signal Brief",
+      "tagline": "Warm paper and deep navy, a single antique gold accent, serif throughout.",
+      "scheme": "light",
+      "formality": "high",
+      "density": "high",
+      "mood": ["institutional", "considered", "authoritative"],
+      "best_for": "Consulting deliverables, board papers, investor updates, policy and academic work. Survives being forwarded.",
+      "avoid_for": "Anything that should feel fast, playful or informal.",
+      "pptx_safe": true
+    },
+    {
+      "slug": "broadsheet",
+      "name": "Broadsheet",
+      "tagline": "White page, black type, one red mark. Newspaper structure at slide scale.",
+      "scheme": "light",
+      "formality": "medium",
+      "density": "medium",
+      "mood": ["editorial", "direct", "timeless"],
+      "best_for": "Conference talks, opinion-led decks, launches with a strong point of view. Excellent on a poor projector.",
+      "avoid_for": "Decks with many charts. The restraint fights dense data.",
+      "pptx_safe": true
+    },
+    {
+      "slug": "blueprint",
+      "name": "Blueprint",
+      "tagline": "Cool grey ground, a fine technical grid, monospace labels on humanist body.",
+      "scheme": "light",
+      "formality": "medium",
+      "density": "high",
+      "mood": ["precise", "technical", "methodical"],
+      "best_for": "Engineering talks, teaching, technical diligence, research. The grid carries dense information calmly.",
+      "avoid_for": "Emotional or brand-led work. It reads as clinical.",
+      "pptx_safe": true
+    },
+    {
+      "slug": "sunrise",
+      "name": "Sunrise",
+      "tagline": "Warm cream, terracotta and clay, humanist type with generous space.",
+      "scheme": "light",
+      "formality": "low",
+      "density": "low",
+      "mood": ["warm", "human", "optimistic"],
+      "best_for": "Brand and campaign work, social impact, culture decks, anything that should feel made by people.",
+      "avoid_for": "Financial or legal material where warmth undercuts the message.",
+      "pptx_safe": true
+    },
+    {
+      "slug": "graphite",
+      "name": "Graphite",
+      "tagline": "Near-black surface, one hot accent, tight grotesque, ruthless hierarchy.",
+      "scheme": "dark",
+      "formality": "medium",
+      "density": "low",
+      "mood": ["sharp", "premium", "decisive"],
+      "best_for": "Startup pitches, product launches, keynote moments. Big numbers land hard on this ground.",
+      "avoid_for": "Dense analysis, printed decks, bad projectors.",
+      "pptx_safe": true
+    },
+    {
+      "slug": "studio",
+      "name": "Studio",
+      "tagline": "Full-bleed colour blocks, oversized type, hard edges, no shadows anywhere.",
+      "scheme": "mixed",
+      "formality": "low",
+      "density": "low",
+      "mood": ["bold", "graphic", "playful"],
+      "best_for": "Creative reviews, campaign presentations, agency work, culture and internal rallying decks.",
+      "avoid_for": "Anything sober. The colour blocking is the entire personality.",
+      "pptx_safe": true
+    },
+    {
+      "slug": "clinic",
+      "name": "Clinic",
+      "tagline": "White ground, restrained blue-grey, precise spacing, nothing decorative.",
+      "scheme": "light",
+      "formality": "high",
+      "density": "high",
+      "mood": ["calm", "neutral", "trustworthy"],
+      "best_for": "Internal updates, academic and medical work, regulated industries, any deck where the content must not be upstaged.",
+      "avoid_for": "Persuasion. It is deliberately quiet and will not carry a pitch.",
+      "pptx_safe": true
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+# Nothing here is needed to build an HTML deck by hand. Install what the job
+# actually needs, or install everything with:  pip install -r requirements.txt
+
+# --- PowerPoint output (scripts/build_pptx.py) ---
+# Also used to read .pptx files in scripts/ingest.py
+python-pptx>=1.0.0
+
+# --- Reading source documents (scripts/ingest.py) ---
+pypdf>=4.0.0            # .pdf
+python-docx>=1.1.0      # .docx
+openpyxl>=3.1.0         # .xlsx, .xlsm
+# .csv, .md and .txt need nothing extra
+
+# --- Preparing images (scripts/process_images.py) ---
+Pillow>=10.0.0
+
+# --- Checking a deck before delivery (scripts/verify_deck.py) ---
+# After installing, download the browser once:  playwright install chromium
+playwright>=1.40.0
+
+# scripts/embed_fonts.py uses only the standard library.
+# scripts/deploy.sh needs Node, for Vercel's CLI. No Python.
