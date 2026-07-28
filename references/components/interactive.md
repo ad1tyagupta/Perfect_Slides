@@ -58,9 +58,9 @@ creative with its rationale, or a question with its answer.
               font: 600 30px/1.12 var(--font-display); color: #fff; }
 .flag { position: absolute; top: 16px; right: 16px;
         background: var(--accent); color: var(--on-accent);
-        font: 900 15px var(--font-body); letter-spacing: .06em;
+        font: 900 18px var(--font-body); letter-spacing: .06em;
         padding: 7px 13px; border-radius: 999px; }
-.back-label { font: 700 17px var(--font-body); letter-spacing: .16em;
+.back-label { font: 700 18px var(--font-body); letter-spacing: .16em;
               text-transform: uppercase; opacity: .75; margin-bottom: 14px; }
 .back-copy  { font: italic 400 25px/1.4 var(--font-display); color: #fff; }
 ```
@@ -199,6 +199,11 @@ works because it shows the real artefact rather than describing it.
 .notif-time { font-size: 14px; color: rgba(255,255,255,.65); }
 .notif-body { font-size: 17.5px; line-height: 1.4; color: #fff; margin-top: 9px; }
 ```
+
+**Type inside a device mockup is exempt from the 18px floor.** A phone is 352px
+wide on a 1920 stage, so its interface text scales like real phone text and
+14 to 18px is correct there. `verify_deck.py` skips anything inside `.phone`,
+`.device` or `[data-device]`. Everywhere else the floor applies.
 
 `data-replay` makes the notification animate again each time the slide is
 revisited. Without it the animation only ever plays once and the slide looks dead

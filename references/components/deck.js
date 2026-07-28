@@ -372,6 +372,33 @@ class Editor {
         this.index();
         this.restore();
         this.bind();
+        this.announce();
+    }
+
+    /* The pencil is invisible until you hover an unmarked corner, which means
+       nobody discovers editing exists. Show it briefly on load, once, with a
+       dismissible hint. */
+    announce() {
+        if (!this.toggle) return;
+        this.toggle.classList.add('show');
+        setTimeout(() => { if (!this.active) this.toggle.classList.remove('show'); }, 4000);
+
+        let seen = false;
+        try { seen = localStorage.getItem(this.key + ':hinted') === '1'; } catch (_) {}
+        if (seen) return;
+
+        const hint = document.createElement('div');
+        hint.className = 'edit-hint';
+        hint.innerHTML = '<b>E</b> to edit any text on this deck';
+        document.body.appendChild(hint);
+
+        const dismiss = () => {
+            hint.classList.add('gone');
+            setTimeout(() => hint.remove(), 400);
+            try { localStorage.setItem(this.key + ':hinted', '1'); } catch (_) {}
+        };
+        hint.addEventListener('click', dismiss);
+        setTimeout(dismiss, 6000);
     }
 
     /* Stable ids so saved edits survive a reload. Index within the slide, so

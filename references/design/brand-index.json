@@ -6,180 +6,501 @@
     "These are website design systems, not slide templates. Read design/brands.md before using one. Palette, type pairing, radius and spacing transfer. Buttons, navigation and breakpoints do not.",
     "Describe the result as 'in the spirit of <company>', never as official or as being from that company.",
     "Never reproduce a company logo or wordmark in a deck that is not theirs.",
-    "Most brand fonts are proprietary. brands.md gives the substitution chain."
+    "Most brand fonts are proprietary. brands.md gives the substitution chain.",
+    "A company not listed anywhere here still works. Build the palette from its publicly documented brand colours, follow design/brands.md, and say plainly at delivery that this is what you did."
   ],
   "curated": [
     {
-      "slug": "linear.app", "name": "Linear", "scheme": "dark",
-      "palette": { "bg": "#010102", "ink": "#f7f8f8", "accent": "#5e6ad2" },
-      "mood": ["precise", "modern", "engineered"],
+      "slug": "linear.app",
+      "name": "Linear",
+      "scheme": "dark",
+      "palette": {
+        "bg": "#010102",
+        "ink": "#f7f8f8",
+        "accent": "#5e6ad2"
+      },
+      "mood": [
+        "precise",
+        "modern",
+        "engineered"
+      ],
       "best_for": "Product and engineering decks. Near-black ground, violet accent, very tight type. Big numbers land hard.",
       "avoid_for": "Printed decks and bad projectors.",
-      "font_chain": ["Inter Tight", "Inter"], "pptx_safe": true
+      "font_chain": [
+        "Inter Tight",
+        "Inter"
+      ],
+      "pptx_safe": true
     },
     {
-      "slug": "vercel", "name": "Vercel", "scheme": "light",
-      "palette": { "bg": "#ffffff", "ink": "#171717", "accent": "#171717" },
-      "mood": ["stark", "minimal", "confident"],
+      "slug": "vercel",
+      "name": "Vercel",
+      "scheme": "light",
+      "palette": {
+        "bg": "#ffffff",
+        "ink": "#171717",
+        "accent": "#171717"
+      },
+      "mood": [
+        "stark",
+        "minimal",
+        "confident"
+      ],
       "best_for": "Technical decks that want nothing decorative. Pure monochrome, geometry does all the work.",
       "avoid_for": "Anything needing warmth or colour coding.",
-      "font_chain": ["Geist", "Inter"], "pptx_safe": true
+      "font_chain": [
+        "Geist",
+        "Inter"
+      ],
+      "pptx_safe": true
     },
     {
-      "slug": "stripe", "name": "Stripe", "scheme": "light",
-      "palette": { "bg": "#ffffff", "ink": "#0d253d", "accent": "#533afd" },
-      "mood": ["polished", "trustworthy", "technical"],
+      "slug": "stripe",
+      "name": "Stripe",
+      "scheme": "light",
+      "palette": {
+        "bg": "#ffffff",
+        "ink": "#0d253d",
+        "accent": "#533afd"
+      },
+      "mood": [
+        "polished",
+        "trustworthy",
+        "technical"
+      ],
       "best_for": "Fintech, B2B and developer-facing decks. Deep navy text on white with a confident violet.",
       "avoid_for": "Creative and campaign work. Too corporate.",
-      "font_chain": ["Sohne", "Inter"], "pptx_safe": true
+      "font_chain": [
+        "Sohne",
+        "Inter"
+      ],
+      "pptx_safe": true
     },
     {
-      "slug": "notion", "name": "Notion", "scheme": "light",
-      "palette": { "bg": "#ffffff", "ink": "#1a1a1a", "accent": "#5645d4" },
-      "mood": ["calm", "editorial", "unfussy"],
+      "slug": "notion",
+      "name": "Notion",
+      "scheme": "light",
+      "palette": {
+        "bg": "#ffffff",
+        "ink": "#1a1a1a",
+        "accent": "#5645d4"
+      },
+      "mood": [
+        "calm",
+        "editorial",
+        "unfussy"
+      ],
       "best_for": "Teaching, documentation and internal decks. Reads like a well-set document.",
       "avoid_for": "Decks that need to persuade hard.",
-      "font_chain": ["Lora", "Inter"], "pptx_safe": true
+      "font_chain": [
+        "Lora",
+        "Inter"
+      ],
+      "pptx_safe": true
     },
     {
-      "slug": "claude", "name": "Claude", "scheme": "light",
-      "palette": { "bg": "#faf9f5", "ink": "#141413", "accent": "#cc785c" },
-      "mood": ["warm", "humanist", "considered"],
+      "slug": "claude",
+      "name": "Claude",
+      "scheme": "light",
+      "palette": {
+        "bg": "#faf9f5",
+        "ink": "#141413",
+        "accent": "#cc785c"
+      },
+      "mood": [
+        "warm",
+        "humanist",
+        "considered"
+      ],
       "best_for": "Research, thought leadership and anything that should feel human. Cream ground with a warm coral, deliberately warm where most tech is cool.",
       "avoid_for": "Hard financial material where warmth undercuts the message.",
-      "font_chain": ["Cormorant Garamond", "Source Serif 4"], "pptx_safe": true
+      "font_chain": [
+        "Cormorant Garamond",
+        "Source Serif 4"
+      ],
+      "pptx_safe": true
     },
     {
-      "slug": "apple", "name": "Apple", "scheme": "light",
-      "palette": { "bg": "#ffffff", "ink": "#1d1d1f", "accent": "#0066cc" },
-      "mood": ["clear", "product-led", "spacious"],
+      "slug": "apple",
+      "name": "Apple",
+      "scheme": "light",
+      "palette": {
+        "bg": "#ffffff",
+        "ink": "#1d1d1f",
+        "accent": "#0066cc"
+      },
+      "mood": [
+        "clear",
+        "product-led",
+        "spacious"
+      ],
       "best_for": "Product launches and demos. Enormous type, huge white space, one image doing the work.",
       "avoid_for": "Dense analysis. The system refuses density.",
-      "font_chain": ["Inter Tight", "Inter"], "pptx_safe": true
+      "font_chain": [
+        "Inter Tight",
+        "Inter"
+      ],
+      "pptx_safe": true
     },
     {
-      "slug": "ibm", "name": "IBM", "scheme": "light",
-      "palette": { "bg": "#ffffff", "ink": "#161616", "accent": "#0f62fe" },
-      "mood": ["institutional", "systematic", "technical"],
+      "slug": "ibm",
+      "name": "IBM",
+      "scheme": "light",
+      "palette": {
+        "bg": "#ffffff",
+        "ink": "#161616",
+        "accent": "#0f62fe"
+      },
+      "mood": [
+        "institutional",
+        "systematic",
+        "technical"
+      ],
       "best_for": "Enterprise, research and consulting. A strict grid and IBM Plex carry dense information calmly.",
       "avoid_for": "Warm or emotional work. It reads as engineered.",
-      "font_chain": ["IBM Plex Sans", "IBM Plex Serif", "IBM Plex Mono"], "pptx_safe": true
+      "font_chain": [
+        "IBM Plex Sans",
+        "IBM Plex Serif",
+        "IBM Plex Mono"
+      ],
+      "pptx_safe": true
     },
     {
-      "slug": "figma", "name": "Figma", "scheme": "light",
-      "palette": { "bg": "#ffffff", "ink": "#000000", "accent": "#0d99ff" },
-      "mood": ["creative", "playful", "bright"],
+      "slug": "figma",
+      "name": "Figma",
+      "scheme": "light",
+      "palette": {
+        "bg": "#ffffff",
+        "ink": "#000000",
+        "accent": "#0d99ff"
+      },
+      "mood": [
+        "creative",
+        "playful",
+        "bright"
+      ],
       "best_for": "Design reviews, creative work, workshops. Multi-colour accents on white.",
       "avoid_for": "Sober financial or legal material.",
-      "font_chain": ["Whyte", "Inter"], "pptx_safe": true
+      "font_chain": [
+        "Whyte",
+        "Inter"
+      ],
+      "pptx_safe": true
     },
     {
-      "slug": "airbnb", "name": "Airbnb", "scheme": "light",
-      "palette": { "bg": "#ffffff", "ink": "#222222", "accent": "#ff385c" },
-      "mood": ["warm", "friendly", "photographic"],
+      "slug": "airbnb",
+      "name": "Airbnb",
+      "scheme": "light",
+      "palette": {
+        "bg": "#ffffff",
+        "ink": "#222222",
+        "accent": "#ff385c"
+      },
+      "mood": [
+        "warm",
+        "friendly",
+        "photographic"
+      ],
       "best_for": "Consumer and brand decks built around photography. Rounded, generous, approachable.",
       "avoid_for": "Decks with no images. The system leans on them.",
-      "font_chain": ["Poppins", "Inter"], "pptx_safe": true
+      "font_chain": [
+        "Poppins",
+        "Inter"
+      ],
+      "pptx_safe": true
     },
     {
-      "slug": "wise", "name": "Wise", "scheme": "light",
-      "palette": { "bg": "#ffffff", "ink": "#0e0f0c", "accent": "#9fe870" },
-      "mood": ["bold", "direct", "optimistic"],
+      "slug": "wise",
+      "name": "Wise",
+      "scheme": "light",
+      "palette": {
+        "bg": "#ffffff",
+        "ink": "#0e0f0c",
+        "accent": "#9fe870"
+      },
+      "mood": [
+        "bold",
+        "direct",
+        "optimistic"
+      ],
       "best_for": "Fintech and consumer finance. Acid green against near-black, unusually confident for the category.",
       "avoid_for": "Traditional or conservative finance audiences.",
-      "font_chain": ["Inter Tight", "Inter"], "pptx_safe": true
+      "font_chain": [
+        "Inter Tight",
+        "Inter"
+      ],
+      "pptx_safe": true
     },
     {
-      "slug": "revolut", "name": "Revolut", "scheme": "dark",
-      "palette": { "bg": "#191c1f", "ink": "#ffffff", "accent": "#494fdf" },
-      "mood": ["premium", "sharp", "urban"],
+      "slug": "revolut",
+      "name": "Revolut",
+      "scheme": "dark",
+      "palette": {
+        "bg": "#191c1f",
+        "ink": "#ffffff",
+        "accent": "#494fdf"
+      },
+      "mood": [
+        "premium",
+        "sharp",
+        "urban"
+      ],
       "best_for": "Fintech pitches and product launches on a good screen.",
       "avoid_for": "Print and projectors.",
-      "font_chain": ["Aeonik", "Manrope"], "pptx_safe": true
+      "font_chain": [
+        "Aeonik",
+        "Manrope"
+      ],
+      "pptx_safe": true
     },
     {
-      "slug": "slack", "name": "Slack", "scheme": "light",
-      "palette": { "bg": "#ffffff", "ink": "#1d1d1d", "accent": "#4a154b" },
-      "mood": ["approachable", "professional", "colourful"],
+      "slug": "slack",
+      "name": "Slack",
+      "scheme": "light",
+      "palette": {
+        "bg": "#ffffff",
+        "ink": "#1d1d1d",
+        "accent": "#4a154b"
+      },
+      "mood": [
+        "approachable",
+        "professional",
+        "colourful"
+      ],
       "best_for": "Internal comms, onboarding, team decks. Deep aubergine with bright secondary colours.",
       "avoid_for": "Formal external deliverables.",
-      "font_chain": ["Manrope", "Inter"], "pptx_safe": true
+      "font_chain": [
+        "Manrope",
+        "Inter"
+      ],
+      "pptx_safe": true
     },
     {
-      "slug": "shopify", "name": "Shopify", "scheme": "light",
-      "palette": { "bg": "#ffffff", "ink": "#000000", "accent": "#008060" },
-      "mood": ["commercial", "practical", "solid"],
+      "slug": "shopify",
+      "name": "Shopify",
+      "scheme": "light",
+      "palette": {
+        "bg": "#ffffff",
+        "ink": "#000000",
+        "accent": "#008060"
+      },
+      "mood": [
+        "commercial",
+        "practical",
+        "solid"
+      ],
       "best_for": "Commerce, retail and merchant-facing decks. Plain and businesslike.",
       "avoid_for": "Work that needs a distinctive visual signature.",
-      "font_chain": ["Inter Tight", "Inter"], "pptx_safe": true
+      "font_chain": [
+        "Inter Tight",
+        "Inter"
+      ],
+      "pptx_safe": true
     },
     {
-      "slug": "wired", "name": "WIRED", "scheme": "light",
-      "palette": { "bg": "#ffffff", "ink": "#000000", "accent": "#ff3d00" },
-      "mood": ["editorial", "opinionated", "graphic"],
+      "slug": "wired",
+      "name": "WIRED",
+      "scheme": "light",
+      "palette": {
+        "bg": "#ffffff",
+        "ink": "#000000",
+        "accent": "#ff3d00"
+      },
+      "mood": [
+        "editorial",
+        "opinionated",
+        "graphic"
+      ],
       "best_for": "Conference talks and opinion-led decks. Magazine structure, heavy rules, one hot accent.",
       "avoid_for": "Chart-heavy analysis. The restraint fights dense data.",
-      "font_chain": ["Archivo", "Work Sans"], "pptx_safe": true
+      "font_chain": [
+        "Archivo",
+        "Work Sans"
+      ],
+      "pptx_safe": true
     },
     {
-      "slug": "mongodb", "name": "MongoDB", "scheme": "light",
-      "palette": { "bg": "#ffffff", "ink": "#001e2b", "accent": "#00ed64" },
-      "mood": ["technical", "energetic", "clean"],
+      "slug": "mongodb",
+      "name": "MongoDB",
+      "scheme": "light",
+      "palette": {
+        "bg": "#ffffff",
+        "ink": "#001e2b",
+        "accent": "#00ed64"
+      },
+      "mood": [
+        "technical",
+        "energetic",
+        "clean"
+      ],
       "best_for": "Developer and data decks. Deep slate text with a bright green that survives a projector.",
       "avoid_for": "Consumer brand work.",
-      "font_chain": ["Space Grotesk", "Inter"], "pptx_safe": true
+      "font_chain": [
+        "Space Grotesk",
+        "Inter"
+      ],
+      "pptx_safe": true
     },
     {
-      "slug": "raycast", "name": "Raycast", "scheme": "dark",
-      "palette": { "bg": "#07080a", "ink": "#f4f4f6", "accent": "#ff6363" },
-      "mood": ["sharp", "developer", "nocturnal"],
+      "slug": "raycast",
+      "name": "Raycast",
+      "scheme": "dark",
+      "palette": {
+        "bg": "#07080a",
+        "ink": "#f4f4f6",
+        "accent": "#ff6363"
+      },
+      "mood": [
+        "sharp",
+        "developer",
+        "nocturnal"
+      ],
       "best_for": "Developer tools and demos. Near-black with a coral accent and precise type.",
       "avoid_for": "Print, and any room with a weak projector.",
-      "font_chain": ["Inter Tight", "Inter"], "pptx_safe": true
+      "font_chain": [
+        "Inter Tight",
+        "Inter"
+      ],
+      "pptx_safe": true
     },
     {
-      "slug": "nike", "name": "Nike", "scheme": "light",
-      "palette": { "bg": "#ffffff", "ink": "#111111", "accent": "#111111" },
-      "mood": ["bold", "athletic", "declarative"],
+      "slug": "nike",
+      "name": "Nike",
+      "scheme": "light",
+      "palette": {
+        "bg": "#ffffff",
+        "ink": "#111111",
+        "accent": "#111111"
+      },
+      "mood": [
+        "bold",
+        "athletic",
+        "declarative"
+      ],
       "best_for": "Campaign and brand work. Enormous condensed type, full-bleed imagery, almost no body copy.",
       "avoid_for": "Anything with real information density.",
-      "font_chain": ["Archivo Expanded", "Archivo"], "pptx_safe": true
+      "font_chain": [
+        "Archivo Expanded",
+        "Archivo"
+      ],
+      "pptx_safe": true
     },
     {
-      "slug": "supabase", "name": "Supabase", "scheme": "dark",
-      "palette": { "bg": "#1c1c1c", "ink": "#ededed", "accent": "#3ecf8e" },
-      "mood": ["technical", "open", "modern"],
-      "best_for": "Developer decks and technical talks. Dark ground with an emerald accent.",
-      "avoid_for": "Print and non-technical audiences.",
-      "font_chain": ["Inter Tight", "Inter"], "pptx_safe": true
+      "slug": "uber",
+      "name": "Uber",
+      "scheme": "light",
+      "palette": {
+        "bg": "#ffffff",
+        "ink": "#000000",
+        "accent": "#000000"
+      },
+      "mood": [
+        "direct",
+        "urban",
+        "utilitarian"
+      ],
+      "best_for": "Consumer, transport, logistics and operations decks. Pure black on white with heavy type. Reads as practical rather than decorative.",
+      "avoid_for": "Work needing warmth or colour coding.",
+      "font_chain": [
+        "Archivo",
+        "Inter"
+      ],
+      "pptx_safe": true
     },
     {
-      "slug": "intercom", "name": "Intercom", "scheme": "light",
-      "palette": { "bg": "#f5f1ec", "ink": "#111111", "accent": "#1f8ded" },
-      "mood": ["warm", "editorial", "practical"],
-      "best_for": "Customer-facing and support decks. A warm off-white ground that is easier on the eye than pure white.",
-      "avoid_for": "Decks needing a hard, technical edge.",
-      "font_chain": ["Inter Tight", "Inter"], "pptx_safe": true
+      "slug": "mastercard",
+      "name": "Mastercard",
+      "scheme": "light",
+      "palette": {
+        "bg": "#f3f0ee",
+        "ink": "#141413",
+        "accent": "#eb001b"
+      },
+      "mood": [
+        "established",
+        "warm-neutral",
+        "global"
+      ],
+      "best_for": "Payments, banking and enterprise decks. A warm cream ground rather than white, which is easier to read for long stretches and prints well.",
+      "avoid_for": "Startup pitches. It reads institutional.",
+      "font_chain": [
+        "Sofia Sans",
+        "Inter"
+      ],
+      "pptx_safe": true
     },
     {
-      "slug": "coinbase", "name": "Coinbase", "scheme": "light",
-      "palette": { "bg": "#ffffff", "ink": "#0a0b0d", "accent": "#0052ff" },
-      "mood": ["clean", "institutional", "confident"],
-      "best_for": "Fintech and crypto decks that need to read as regulated rather than speculative.",
-      "avoid_for": "Playful or creative work.",
-      "font_chain": ["Inter Tight", "Inter"], "pptx_safe": true
+      "slug": "bmw",
+      "name": "BMW",
+      "scheme": "light",
+      "palette": {
+        "bg": "#ffffff",
+        "ink": "#16181a",
+        "accent": "#1c69d4"
+      },
+      "mood": [
+        "engineered",
+        "premium",
+        "precise"
+      ],
+      "best_for": "Automotive, manufacturing, industrial and premium product decks. Confident blue against near-black, built around large photography.",
+      "avoid_for": "Decks with no imagery. The system leans on it.",
+      "font_chain": [
+        "Inter Tight",
+        "Inter"
+      ],
+      "pptx_safe": true
     }
   ],
   "also_available_by_name": {
     "note": "Not curated because their systems lean on photography, licensed typefaces or product UI that does not translate to slides. Usable if the user asks for one by name. Fetch its DESIGN.md from the source repo, then apply design/brands.md as normal, and tell the user which parts did not translate.",
     "slugs": [
-      "airtable", "binance", "bmw", "bmw-m", "bugatti", "cal", "clay", "clickhouse",
-      "cohere", "composio", "cursor", "dell-1996", "elevenlabs", "expo", "ferrari",
-      "framer", "hashicorp", "hp", "meta", "minimax", "mintlify", "miro", "mistral.ai",
-      "nintendo-2001", "nvidia", "ollama", "opencode.ai", "pinterest", "playstation",
-      "posthog", "renault", "replicate", "resend", "sanity", "sentry", "spacex",
-      "superhuman", "together.ai", "uber", "vodafone", "voltagent", "warp", "webflow",
-      "x.ai", "zapier"
+      "airtable",
+      "binance",
+      "bmw-m",
+      "bugatti",
+      "cal",
+      "clay",
+      "clickhouse",
+      "cohere",
+      "coinbase",
+      "composio",
+      "cursor",
+      "dell-1996",
+      "elevenlabs",
+      "expo",
+      "ferrari",
+      "framer",
+      "hashicorp",
+      "hp",
+      "intercom",
+      "meta",
+      "minimax",
+      "mintlify",
+      "miro",
+      "mistral.ai",
+      "nintendo-2001",
+      "nvidia",
+      "ollama",
+      "opencode.ai",
+      "pinterest",
+      "playstation",
+      "posthog",
+      "renault",
+      "replicate",
+      "resend",
+      "sanity",
+      "sentry",
+      "spacex",
+      "supabase",
+      "superhuman",
+      "together.ai",
+      "vodafone",
+      "voltagent",
+      "warp",
+      "webflow",
+      "x.ai",
+      "zapier"
     ]
   }
 }

@@ -35,7 +35,8 @@ Break any of these and the output stops being worth using.
    cannot degrade honestly. See `references/components/catalog.md`.
 6. **Fixed 1920x1080 stage.** Slides scale as one unit and never reflow.
 7. **Verify before delivering.** Run `scripts/verify_deck.py`. Do not tell the
-   user it is done until it passes.
+   user it is done until it passes. Invisible or low-contrast text is the
+   report's most serious finding and always means a broken slide.
 8. **Follow the writing rules.** `references/writing/voice.md` is not optional
    styling. No em dashes, no filler words, no repetition.
 
@@ -81,6 +82,14 @@ python scripts/build_pptx.py deck.json out.pptx
 **Both** → write `deck.json` first as the shared content spine, then author the
 HTML from it. Same content, two honest expressions.
 
+**Slide variants must be written `.slide.divider`, never `.divider`.** A bare
+class ties with `.slide` in `stage.css` and loses on source order, which paints
+the theme background back on and renders the slide blank. See `output/html.md`.
+
+If they chose a shareable link at intake, run `bash scripts/deploy.sh` now, so
+the one-time Vercel signup happens while they are waiting rather than after
+handover.
+
 ### 5. Verify
 ```
 python scripts/verify_deck.py deck.html --shots ./shots
@@ -97,11 +106,19 @@ Before adding user images, run `python scripts/process_images.py assets/` to
 catch anything oversized or too small to stay sharp at 1920x1080.
 
 ### 6. Deliver
-Say where the file is, how to navigate it, and what you assumed. Mention that
-pressing `E` lets them edit any text in the browser, so small wording fixes cost
-them nothing. Offer `scripts/deploy.sh` if they want a link to share. If a font was
-substituted in the .pptx, say so now rather than letting them find out in front
-of a client.
+
+Say where the file is, what you assumed, and how to use it. Cover these four:
+
+1. **Open it in a real browser.** Preview panels inside editors often do not
+   pass keystrokes, so `E`, `F` and `P` appear broken when they are not.
+2. **`E` edits any text**, saved automatically. A hint shows once on first open.
+   Small wording fixes should cost them nothing.
+3. **`P` opens presenter view** with notes, next slide and a timer.
+4. **Any font substituted in the .pptx**, named plainly. Better said now than
+   discovered in front of a client.
+
+If they asked for a shareable link at intake, it is already deployed. Give them
+the URL here rather than offering to start.
 
 ---
 

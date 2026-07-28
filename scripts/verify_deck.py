@@ -23,6 +23,51 @@ CHECK_JS = r"""
     const problems = [];
     const slides = [...document.querySelectorAll('.slide')];
 
+    /* --- Colour maths, for the contrast check ---------------------------- */
+    const toRGBA = s => {
+        const m = String(s || '').match(/rgba?\(([^)]+)\)/);
+        if (!m) return null;
+        const p = m[1].split(',').map(parseFloat);
+        return [p[0], p[1], p[2], p.length > 3 ? p[3] : 1];
+    };
+    const chan = c => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+    const lum = c => 0.2126 * chan(c[0]) + 0.7152 * chan(c[1]) + 0.0722 * chan(c[2]);
+    const blend = (fg, bg) => {           // composite fg with alpha over bg
+        const a = fg[3];
+        return [fg[0] * a + bg[0] * (1 - a),
+                fg[1] * a + bg[1] * (1 - a),
+                fg[2] * a + bg[2] * (1 - a), 1];
+    };
+    const ratio = (a, b) => {
+        const l1 = lum(a), l2 = lum(b);
+        const hi = Math.max(l1, l2), lo = Math.min(l1, l2);
+        return (hi + 0.05) / (lo + 0.05);
+    };
+
+    // Walk up compositing background colours until one is fully opaque.
+    // A background-image or gradient anywhere in the chain means we cannot
+    // judge, so we say so rather than guessing.
+    const effectiveBg = el => {
+        const stack = [];
+        let node = el, image = false;
+        while (node && node !== document.documentElement) {
+            const cs = getComputedStyle(node);
+            if (cs.backgroundImage && cs.backgroundImage !== 'none') image = true;
+            const c = toRGBA(cs.backgroundColor);
+            if (c && c[3] > 0) { stack.push(c); if (c[3] >= 1) break; }
+            node = node.parentElement;
+        }
+        if (!stack.length) return { color: [255, 255, 255, 1], image };
+        let base = stack[stack.length - 1];
+        if (base[3] < 1) base = blend(base, [255, 255, 255, 1]);
+        for (let i = stack.length - 2; i >= 0; i--) base = blend(stack[i], base);
+        return { color: base, image };
+    };
+
+    // Device mockups render a phone UI at true phone scale, so their internal
+    // type is legitimately small. Everything else obeys the 18px floor.
+    const inDevice = el => !!el.closest('.phone, .device, [data-device]');
+
     // Drive slides by class only. Setting inline visibility here would
     // outrank the stylesheet and leave the deck stuck after the check runs.
     const show = (s) => {
@@ -68,16 +113,41 @@ CHECK_JS = r"""
             }
         });
 
-        // 3. Type too small to read on a projector.
+        // 3. Type too small to read on a projector, and text nobody can see.
         //    18px on a 1920 stage is roughly 9pt on a real slide.
-        [...slide.querySelectorAll('p,li,span,div,td,th,h1,h2,h3,h4,figcaption')].forEach(el => {
+        [...slide.querySelectorAll('p,li,span,div,td,th,h1,h2,h3,h4,figcaption,blockquote,text')].forEach(el => {
             if (!readable(el)) return;
             if (el.children.length > 0) return;          // only leaf text
-            const size = parseFloat(getComputedStyle(el).fontSize);
-            if (size && size < 18) {
+            const cs = getComputedStyle(el);
+            const size = parseFloat(cs.fontSize);
+
+            if (size && size < 18 && !inDevice(el)) {
                 problems.push({
                     slide: n, kind: 'tiny-text',
                     detail: `${size.toFixed(0)}px`,
+                    text: (el.textContent || '').trim().slice(0, 50)
+                });
+            }
+
+            // Contrast. This is what catches a slide that renders blank,
+            // which the empty-slide check cannot see because the text is
+            // present, just invisible.
+            const fg = toRGBA(cs.color);
+            if (!fg) return;
+            if (parseFloat(cs.opacity) === 0) return;
+            const bg = effectiveBg(el);
+            if (bg.image) return;                        // cannot judge over an image
+            const solidFg = fg[3] < 1 ? blend(fg, bg.color) : fg;
+            const r = ratio(solidFg, bg.color);
+
+            // anti-slop.md: 4.5:1 for body, 3:1 for large text at 24px and up.
+            const large = size >= 24;
+            const floor = large ? 3 : 4.5;
+            if (r < floor) {
+                problems.push({
+                    slide: n,
+                    kind: r < 1.5 ? 'invisible' : 'low-contrast',
+                    detail: `${r.toFixed(2)}:1, needs ${floor}:1 at ${size.toFixed(0)}px`,
                     text: (el.textContent || '').trim().slice(0, 50)
                 });
             }
@@ -282,8 +352,9 @@ def main():
     missing = result["fontsMissing"]
 
     print(f"{result['slideCount']} slides")
+    status = result["fontsStatus"]
     print(f"Fonts loaded: {', '.join(result['fontsOk'][:6]) or 'none'}"
-          f"   (status: {result['fontsStatus']})")
+          + ("" if status == "loaded" else f"   (status: {status})"))
 
     if missing:
         print(f"  ! NOT AVAILABLE: {', '.join(missing)}")
@@ -306,14 +377,18 @@ def main():
 
     print(f"\n{len(problems)} problems:\n")
     labels = {
+        "invisible": "TEXT NOBODY CAN SEE. The slide renders blank",
+        "low-contrast": "Text too faint against its background",
         "overflow": "Content taller or wider than the slide",
         "out-of-bounds": "Element past the slide edge",
         "tiny-text": "Text too small to read from the back",
         "overlap": "Panels covering each other",
         "empty": "Empty slide",
     }
+    severity = {"invisible": 0, "low-contrast": 1, "overflow": 2,
+                "out-of-bounds": 3, "overlap": 4, "tiny-text": 5, "empty": 6}
 
-    for kind, items in sorted(by_kind.items(), key=lambda kv: -len(kv[1])):
+    for kind, items in sorted(by_kind.items(), key=lambda kv: severity.get(kv[0], 9)):
         print(f"  {labels.get(kind, kind)}  ({len(items)})")
         for pr in items[:6]:
             text = f'  "{pr["text"]}"' if pr.get("text") else ""
@@ -321,6 +396,11 @@ def main():
         if len(items) > 6:
             print(f"    ... and {len(items) - 6} more")
         print()
+
+    if "invisible" in by_kind:
+        print("The invisible text is the urgent one. Almost always a slide variant\n"
+              "written as `.divider` instead of `.slide.divider`, which loses to\n"
+              "`.slide` in stage.css and silently paints the theme background back on.\n")
 
     print("Fix these before delivering. Splitting a slide is almost always the "
           "right answer, and shrinking type never is.")

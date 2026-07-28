@@ -255,6 +255,38 @@ body.presenting.show-chrome .deck-controls { opacity: 1; pointer-events: auto; }
 
 .edit-bar button:hover { background: rgba(255, 255, 255, .26); }
 
+/* One-time hint. Editing is worthless if nobody discovers it exists. */
+.edit-hint {
+    position: fixed;
+    top: 22px; left: 74px;
+    z-index: 10001;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, .16);
+    background: rgba(0, 0, 0, .82);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    font: 500 15px/1 system-ui, sans-serif;
+    cursor: pointer;
+    animation: edit-hint-in .45s cubic-bezier(.16, 1, .3, 1);
+}
+
+.edit-hint b {
+    display: inline-block;
+    margin-right: 8px;
+    padding: 3px 8px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, .18);
+    font-weight: 700;
+}
+
+.edit-hint.gone { opacity: 0; transition: opacity .4s ease; }
+
+@keyframes edit-hint-in {
+    from { opacity: 0; transform: translateX(-10px); }
+    to   { opacity: 1; transform: none; }
+}
+
 body.editing [contenteditable] {
     outline: 1px dashed rgba(127, 127, 127, .55);
     outline-offset: 4px;
@@ -268,7 +300,8 @@ body.editing [contenteditable]:focus {
 
 /* Editing chrome never appears while presenting or in print. */
 body.presenting .edit-toggle,
-body.presenting .edit-hotzone { display: none; }
+body.presenting .edit-hotzone,
+body.presenting .edit-hint { display: none; }
 
 /* 10. Print: one slide per page, drives PDF export ------------------------ */
 @media print {
@@ -297,7 +330,7 @@ body.presenting .edit-hotzone { display: none; }
     }
 
     .deck-controls, .deck-progress,
-    .edit-toggle, .edit-hotzone, .edit-bar { display: none !important; }
+    .edit-toggle, .edit-hotzone, .edit-bar, .edit-hint { display: none !important; }
 }
 
 /* 11. Reduced motion ------------------------------------------------------ */
@@ -1091,6 +1124,33 @@ class Editor {
         this.index();
         this.restore();
         this.bind();
+        this.announce();
+    }
+
+    /* The pencil is invisible until you hover an unmarked corner, which means
+       nobody discovers editing exists. Show it briefly on load, once, with a
+       dismissible hint. */
+    announce() {
+        if (!this.toggle) return;
+        this.toggle.classList.add('show');
+        setTimeout(() => { if (!this.active) this.toggle.classList.remove('show'); }, 4000);
+
+        let seen = false;
+        try { seen = localStorage.getItem(this.key + ':hinted') === '1'; } catch (_) {}
+        if (seen) return;
+
+        const hint = document.createElement('div');
+        hint.className = 'edit-hint';
+        hint.innerHTML = '<b>E</b> to edit any text on this deck';
+        document.body.appendChild(hint);
+
+        const dismiss = () => {
+            hint.classList.add('gone');
+            setTimeout(() => hint.remove(), 400);
+            try { localStorage.setItem(this.key + ':hinted', '1'); } catch (_) {}
+        };
+        hint.addEventListener('click', dismiss);
+        setTimeout(dismiss, 6000);
     }
 
     /* Stable ids so saved edits survive a reload. Index within the slide, so

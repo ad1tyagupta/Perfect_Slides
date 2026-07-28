@@ -338,11 +338,14 @@ Any chart carrying real data needs one.
 ```css
 .source {
     position: absolute; left: 92px; bottom: 44px;
-    font-size: 17px; color: var(--muted); opacity: .75;
+    font-size: 19px; color: var(--muted); opacity: .75;
 }
 ```
 
 > Source: internal checkout logs, Jan to Mar 2026. n = 4,812.
+
+19px is the smallest a source line may be. The floor is 18px and
+`verify_deck.py` fails anything below it. See `writing/voice.md`.
 
 Name the origin, the period, and the sample size when there is one. Estimates say
 so. Projections say so.

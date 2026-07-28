@@ -102,6 +102,8 @@ def main():
     ap.add_argument("--resize", action="store_true", help="shrink anything oversized")
     ap.add_argument("--circle", action="store_true", help="crop to a circle")
     ap.add_argument("--max", type=int, default=STAGE_W, help="longest edge, default 1920")
+    ap.add_argument("--deck", help="only report images this HTML deck actually "
+                                   "references, so working files are ignored")
     args = ap.parse_args()
 
     target = Path(args.target)
@@ -111,8 +113,24 @@ def main():
 
     files = ([target] if target.is_file()
              else sorted(f for f in target.rglob("*")
-                         if f.suffix.lower() in EXTS and "_deck" not in f.stem
-                         and "_circle" not in f.stem))
+                         if f.suffix.lower() in EXTS
+                         and not f.name.startswith(".")
+                         and not any(tag in f.stem for tag in
+                                     ("_deck", "_circle", "_processed", "_orig"))))
+
+    # Scoping to a deck stops every stray working file in assets/ being
+    # reported as a problem when nothing on a slide points at it.
+    if args.deck:
+        deck = Path(args.deck)
+        if not deck.exists():
+            print(f"No such deck: {deck}")
+            sys.exit(2)
+        html = deck.read_text(encoding="utf-8", errors="replace")
+        used = {f for f in files if f.name in html}
+        skipped = len(files) - len(used)
+        files = sorted(used)
+        if skipped:
+            print(f"Ignoring {skipped} images {deck.name} does not reference.\n")
 
     if not files:
         print(f"No images found in {target}")

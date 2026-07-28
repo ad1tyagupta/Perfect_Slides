@@ -112,6 +112,25 @@ inside a slide fight the scaling and produce layouts that drift between machines
 A later rule like `.slide-content { display: flex }` overrides `display: none`
 and reveals every slide at once. This is the single most common way a deck breaks.
 
+**Always write slide variants as `.slide.divider`, never `.divider`.**
+
+```css
+.slide.divider { background: var(--ink); }     /* correct */
+.divider       { background: var(--ink); }     /* silently fails */
+```
+
+`stage.css` sets `.slide { background: var(--slide-bg) }` at specificity (0,1,0).
+A bare `.divider` has the same specificity, so it only wins if it appears later
+in the stylesheet. Group your variants with the theme, as most people naturally
+do, and `.slide` wins instead: the background snaps back to the theme colour
+while your dark-slide text colour stays.
+
+The result is a section divider with white text on a white background. It looks
+completely blank and nothing in the markup is wrong. `.slide.divider` is (0,2,0)
+and wins regardless of order, so use it every time.
+
+`verify_deck.py` now catches this and reports it as invisible text.
+
 **Never negate a CSS function.** `-clamp(...)` and `-min(...)` are silently
 ignored. Write `calc(-1 * clamp(...))`.
 

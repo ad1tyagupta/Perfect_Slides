@@ -132,6 +132,36 @@ in how it is presented.
 
 ---
 
+## When the company is not in the index
+
+**Any company works, not only the ones listed.** The index is a shortcut, not a
+boundary. Most of the world's brands are not in it, including almost every food,
+retail, airline and non-Western company.
+
+When someone names a company you have no entry for:
+
+1. **Take the palette from their public brand material.** Their site, their brand
+   guidelines if published, their app. Two or three colours is plenty: a
+   dominant, a ground, and one accent.
+2. **Read the type, do not copy it.** Serif or sans, wide or condensed, heavy or
+   light. Then pick the closest open font. Brand faces are nearly always licensed.
+3. **Take one structural habit** if they have an obvious one. Rounded everything,
+   hard edges, heavy rules, full-bleed photography.
+4. **Check contrast before committing.** Brand colours are chosen for logos and
+   packaging. A red that sings on a box often fails behind 24px body text, so
+   keep it for accents and use a readable near-black for text.
+5. **Render it as one of the three previews** like any other option.
+6. **Say what you did**, in one line at Checkpoint 2 and again at delivery:
+   *"Styled from Domino's public brand colours. No logo or wordmark is used."*
+
+Never invent a palette and imply it came from a documented design system. The
+difference between "adapted from their published colours" and "their design
+system" matters, and stating it costs one sentence.
+
+The honesty rules below apply in full. In particular, do not reproduce the logo.
+
+---
+
 ## When a brand does not translate
 
 Some do not, and saying so is better than shipping something weak.
