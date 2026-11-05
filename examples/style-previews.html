@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perfect Slides &middot; style previews</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Karla:wght@400;500;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,500..900;1,500..700&family=Work+Sans:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Archivo:wght@400;600;800;900&family=Syne:wght@700;800&family=Libre+Franklin:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================================================
+   STYLE PREVIEWS
+
+   One title slide per built-in preset, each carrying that preset's own palette,
+   fonts and signature move. Arrow keys or swipe to compare them.
+
+   This file is generated from the repo's own parts: the stage below is
+   references/components/stage.css verbatim, the behaviour is
+   references/components/deck.js verbatim, and every palette is copied from
+   references/design/presets.md. Nothing here is a mock-up.
+   =========================================================================== */
+
+:root { --stage-bg: #15181C; --slide-bg: #FFFFFF; }
+
+/* ===========================================================================
+   FIXED 16:9 STAGE — include this entire file in every HTML deck.
+
+   Slides are authored at 1920x1080 and the whole stage scales to the window.
+   Content never reflows. A deck looks identical on a laptop, a projector and
+   a phone, only smaller.
+   =========================================================================== */
+
+/* 1. Lock the window ------------------------------------------------------ */
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* 2. Full-window viewport ------------------------------------------------- */
+.deck-viewport {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+
+/* 3. The design canvas. JS sets transform: translate(...) scale(...). ------ */
+.deck-stage {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    transform-origin: 0 0;
+    background: var(--slide-bg, #fff);
+}
+
+/* 4. Slides stack inside the stage.
+
+   Visibility is controlled by visibility/opacity/pointer-events, NEVER by
+   display. A later rule such as .slide-content { display: flex } would
+   override display:none and show every slide at once. This is the single
+   most common way a deck breaks.
+   ------------------------------------------------------------------------- */
+.slide {
+    position: absolute;
+    inset: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    background: var(--slide-bg, #fff);
+}
+
+.slide.active,
+.slide.visible {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 1;
+}
+
+/* 5. Media stays inside authored bounds ----------------------------------- */
+img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+
+/* 6. Staggered reveal.
+
+   Set the delay per element with style="--d:.2" (seconds). Preferred over
+   nth-child rules because the order stays visible in the markup.
+   ------------------------------------------------------------------------- */
+.reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity var(--dur, .7s) var(--ease, cubic-bezier(.16, 1, .3, 1)),
+                transform var(--dur, .7s) var(--ease, cubic-bezier(.16, 1, .3, 1));
+    transition-delay: calc(var(--d, 0) * 1s);
+}
+
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+
+/* Variants. Same delay convention. */
+.reveal-scale { opacity: 0; transform: scale(.94); }
+.slide.visible .reveal-scale { opacity: 1; transform: scale(1); }
+
+.reveal-left { opacity: 0; transform: translateX(-44px); }
+.slide.visible .reveal-left { opacity: 1; transform: translateX(0); }
+
+.reveal-blur { opacity: 0; filter: blur(12px); }
+.slide.visible .reveal-blur { opacity: 1; filter: blur(0); }
+
+.reveal-scale, .reveal-left, .reveal-blur {
+    transition: opacity var(--dur, .7s) var(--ease, cubic-bezier(.16, 1, .3, 1)),
+                transform var(--dur, .7s) var(--ease, cubic-bezier(.16, 1, .3, 1)),
+                filter var(--dur, .7s) var(--ease, cubic-bezier(.16, 1, .3, 1));
+    transition-delay: calc(var(--d, 0) * 1s);
+}
+
+/* 7. Chrome lives outside the slide design system ------------------------- */
+.deck-controls {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 9px 16px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, .62);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, .14);
+    color: #fff;
+    font: 500 15px/1 system-ui, sans-serif;
+    user-select: none;
+}
+
+.deck-controls button {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .14);
+    color: inherit;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s;
+}
+
+.deck-controls button:hover { background: var(--accent, #fff); color: #000; }
+.deck-controls button:focus-visible { outline: 2px solid var(--accent, #fff); outline-offset: 2px; }
+.deck-controls .count { min-width: 54px; text-align: center; letter-spacing: .06em; }
+
+.deck-progress {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 4px;
+    width: 0;
+    z-index: 1000;
+    background: var(--accent, #fff);
+    transition: width .35s var(--ease, cubic-bezier(.16, 1, .3, 1));
+}
+
+/* Presenting: hide the chrome, reveal briefly on mouse move. */
+body.presenting .deck-controls {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .45s ease;
+}
+
+body.presenting.show-chrome .deck-controls { opacity: 1; pointer-events: auto; }
+
+/* 8. Speaker notes. Hidden in the deck, read by presenter view and export. - */
+.speaker-notes { display: none; }
+
+/* 9. Inline editing.
+
+   Visibility of the toggle is controlled by JS classes only. Do NOT drive it
+   with a CSS sibling selector: pointer-events:none breaks the hover chain the
+   moment the cursor leaves the hotzone on its way to the button.
+   ------------------------------------------------------------------------- */
+.edit-hotzone {
+    position: fixed;
+    top: 0; left: 0;
+    width: 80px; height: 80px;
+    z-index: 10000;
+}
+
+.edit-toggle {
+    position: fixed;
+    top: 18px; left: 18px;
+    width: 42px; height: 42px;
+    z-index: 10001;
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, .62);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    font-size: 17px;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s ease;
+}
+
+.edit-toggle.show,
+.edit-toggle.active { opacity: 1; pointer-events: auto; }
+
+.edit-bar {
+    position: fixed;
+    left: 50%; bottom: 84px;
+    transform: translateX(-50%);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, .16);
+    background: rgba(0, 0, 0, .82);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    font: 500 15px/1 system-ui, sans-serif;
+}
+
+.edit-bar button {
+    padding: 9px 14px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, .14);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.edit-bar button:hover { background: rgba(255, 255, 255, .26); }
+
+/* One-time hint. Editing is worthless if nobody discovers it exists. */
+.edit-hint {
+    position: fixed;
+    top: 22px; left: 74px;
+    z-index: 10001;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, .16);
+    background: rgba(0, 0, 0, .82);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    font: 500 15px/1 system-ui, sans-serif;
+    cursor: pointer;
+    animation: edit-hint-in .45s cubic-bezier(.16, 1, .3, 1);
+}
+
+.edit-hint b {
+    display: inline-block;
+    margin-right: 8px;
+    padding: 3px 8px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, .18);
+    font-weight: 700;
+}
+
+.edit-hint.gone { opacity: 0; transition: opacity .4s ease; }
+
+@keyframes edit-hint-in {
+    from { opacity: 0; transform: translateX(-10px); }
+    to   { opacity: 1; transform: none; }
+}
+
+body.editing [contenteditable] {
+    outline: 1px dashed rgba(127, 127, 127, .55);
+    outline-offset: 4px;
+    cursor: text;
+}
+
+body.editing [contenteditable]:focus {
+    outline: 2px solid var(--accent, #4af);
+    outline-offset: 4px;
+}
+
+/* Editing chrome never appears while presenting or in print. */
+body.presenting .edit-toggle,
+body.presenting .edit-hotzone,
+body.presenting .edit-hint { display: none; }
+
+/* 10. Print: one slide per page, drives PDF export ------------------------ */
+@media print {
+    html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+    .deck-viewport { position: static; overflow: visible; background: #fff; }
+    .deck-stage { position: static; width: auto; height: auto; transform: none !important; background: none; }
+
+    .slide {
+        position: relative;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        width: 1920px;
+        height: 1080px;
+        break-after: page;
+        page-break-after: always;
+    }
+
+    .slide:last-child { break-after: auto; page-break-after: auto; }
+
+    /* Reveals must be resolved or the PDF prints blank slides. */
+    .reveal, .reveal-scale, .reveal-left, .reveal-blur {
+        opacity: 1 !important;
+        transform: none !important;
+        filter: none !important;
+    }
+
+    .deck-controls, .deck-progress,
+    .edit-toggle, .edit-hotzone, .edit-bar, .edit-hint { display: none !important; }
+}
+
+/* 11. Reduced motion ------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .2s !important;
+    }
+}
+
+
+
+/* Each preview carries its own tokens, scoped to the slide. Nothing leaks.
+   The values are copied verbatim from references/design/presets.md, so what
+   you see here is what the preset actually renders. */
+
+.slide[data-style="night-ride"] {
+    --slide-bg: #0E2635; --bg2: #123448;
+    --ink: #EAF4F8; --muted: #8FB2C0; --accent: #00A8D8;
+    --accent-soft: rgba(0,168,216,.16); --on-accent: #062130;
+    --panel: rgba(255,255,255,.05); --panel-line: rgba(255,255,255,.12);
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'Karla', system-ui, sans-serif;
+}
+.slide[data-style="signal-brief"] {
+    --slide-bg: #F0ECE3; --bg2: #E6E0D4;
+    --ink: #1A2030; --muted: #5A6478; --accent: #A8813C;
+    --accent-soft: rgba(168,129,60,.14); --on-accent: #FFFFFF;
+    --panel: #FFFFFF; --panel-line: rgba(26,32,48,.14);
+    --surface-dark: #1C2644;
+    --font-display: 'Source Serif 4', Georgia, serif;
+    --font-body: 'IBM Plex Sans', Calibri, sans-serif;
+    --font-mono: 'IBM Plex Mono', Consolas, monospace;
+}
+.slide[data-style="broadsheet"] {
+    --slide-bg: #FFFFFF; --bg2: #F4F2EE;
+    --ink: #111111; --muted: #6B6B6B; --accent: #D0021B;
+    --accent-soft: rgba(208,2,27,.10); --on-accent: #FFFFFF;
+    --panel: #F7F5F1; --panel-line: rgba(17,17,17,.14);
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Work Sans', Calibri, sans-serif;
+}
+.slide[data-style="blueprint"] {
+    --slide-bg: #EEF1F4; --bg2: #E4E8ED;
+    --ink: #16202B; --muted: #5F6C7A; --accent: #0B5FCE;
+    --accent-soft: rgba(11,95,206,.10); --on-accent: #FFFFFF;
+    --panel: #FFFFFF; --panel-line: rgba(22,32,43,.16);
+    --grid-line: rgba(22,32,43,.06);
+    --font-display: 'Space Grotesk', Arial, sans-serif;
+    --font-body: 'Inter Tight', Calibri, sans-serif;
+    --font-mono: 'JetBrains Mono', Consolas, monospace;
+}
+.slide[data-style="sunrise"] {
+    --slide-bg: #FBF6EF; --bg2: #F5EBDD;
+    --ink: #2A211B; --muted: #7A6A5C; --accent: #C4623B;
+    --accent-soft: rgba(196,98,59,.13); --on-accent: #FFFFFF;
+    --panel: #FFFFFF; --panel-line: rgba(42,33,27,.12);
+    --accent-2: #6B8E6B;
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'Karla', Calibri, sans-serif;
+}
+.slide[data-style="graphite"] {
+    --slide-bg: #0C0C0E; --bg2: #151519;
+    --ink: #F5F5F7; --muted: #8A8A93; --accent: #E8FF3A;
+    --accent-soft: rgba(232,255,58,.12); --on-accent: #0C0C0E;
+    --panel: rgba(255,255,255,.04); --panel-line: rgba(255,255,255,.10);
+    --font-display: 'Archivo', Impact, sans-serif;
+    --font-body: 'Archivo', Arial, sans-serif;
+}
+.slide[data-style="studio"] {
+    --slide-bg: #1A1A1A; --bg2: #262626;
+    --ink: #FFFFFF; --muted: rgba(255,255,255,.62); --accent: #FF5722;
+    --accent-2: #2E5BFF; --accent-3: #FFC400;
+    --accent-soft: rgba(255,87,34,.16); --on-accent: #1A1A1A;
+    --panel: #FF5722; --panel-line: transparent;
+    --font-display: 'Syne', Impact, sans-serif;
+    --font-body: 'Space Grotesk', Arial, sans-serif;
+}
+.slide[data-style="clinic"] {
+    --slide-bg: #FFFFFF; --bg2: #F7F9FB;
+    --ink: #1B2733; --muted: #66788A; --accent: #2D6E8E;
+    --accent-soft: rgba(45,110,142,.10); --on-accent: #FFFFFF;
+    --panel: #F4F7F9; --panel-line: rgba(27,39,51,.12);
+    --font-display: 'Libre Franklin', Arial, sans-serif;
+    --font-body: 'Libre Franklin', Calibri, sans-serif;
+}
+
+
+
+/* Shared ------------------------------------------------------------------ */
+.slide {
+    color: var(--ink);
+    font-family: var(--font-body);
+    --dur: .7s;
+    --ease: cubic-bezier(.16, 1, .3, 1);
+}
+.pad { position: absolute; inset: 0; padding: 110px 130px; display: flex;
+       flex-direction: column; justify-content: center; }
+.kick { font-size: 24px; letter-spacing: .20em; text-transform: uppercase;
+        color: var(--accent); font-weight: 600; }
+.sub  { font-size: 32px; line-height: 1.5; color: var(--muted);
+        max-width: 1020px; margin-top: 38px; }
+.foot { position: absolute; left: 130px; bottom: 74px; font-size: 22px;
+        color: var(--muted); }
+.tag  { position: absolute; right: 130px; bottom: 74px; font-size: 20px;
+        letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+
+/* 1 · Night Ride — a dashed route threading the slide --------------------- */
+[data-style="night-ride"] .route { position: absolute; inset: 0; width: 1920px;
+    height: 1080px; fill: none; }
+[data-style="night-ride"] .route path { stroke: var(--accent); stroke-width: 3;
+    stroke-dasharray: 16 20; opacity: .42; }
+[data-style="night-ride"] .route circle { fill: var(--accent); opacity: .75; }
+[data-style="night-ride"] h1 { font-family: var(--font-display); font-size: 128px;
+    line-height: 1.02; font-weight: 600; letter-spacing: -.02em; margin-top: 34px; }
+[data-style="night-ride"] h1 em { display: block; font-style: italic;
+    color: var(--accent); font-weight: 500; }
+
+/* 2 · Signal Brief — two surfaces, mono chrome, hairline rules ------------ */
+[data-style="signal-brief"] .band { position: absolute; right: 0; top: 0;
+    width: 560px; height: 1080px; background: var(--surface-dark); }
+[data-style="signal-brief"] .band span { position: absolute; left: 70px;
+    bottom: 96px; width: 420px; font-family: var(--font-mono); font-size: 21px;
+    line-height: 1.75; color: rgba(255,255,255,.72); }
+[data-style="signal-brief"] .band i { display: block; width: 64px; height: 3px;
+    background: var(--accent); margin-bottom: 30px; }
+[data-style="signal-brief"] .pad { padding-right: 700px; }
+[data-style="signal-brief"] .kick { font-family: var(--font-mono);
+    font-size: 21px; letter-spacing: .16em; color: var(--muted); font-weight: 400; }
+[data-style="signal-brief"] .rule { width: 100%; height: 1px;
+    background: var(--panel-line); margin: 30px 0 34px; }
+[data-style="signal-brief"] h1 { font-family: var(--font-display); font-size: 92px;
+    line-height: 1.1; font-weight: 600; letter-spacing: -.015em; }
+[data-style="signal-brief"] h1 b { color: var(--accent); font-weight: 600; }
+
+/* 3 · Broadsheet — a heavy rule, then the headline ------------------------ */
+[data-style="broadsheet"] .masthead { display: flex; justify-content: space-between;
+    align-items: baseline; font-family: var(--font-body); font-size: 22px;
+    letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+[data-style="broadsheet"] .heavy { height: 10px; background: var(--ink);
+    margin: 26px 0 46px; }
+[data-style="broadsheet"] h1 { font-family: var(--font-display); font-size: 118px;
+    line-height: .99; font-weight: 800; letter-spacing: -.025em; max-width: 1480px; }
+[data-style="broadsheet"] h1 mark { background: none; color: var(--accent); }
+[data-style="broadsheet"] .cols { display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 54px; margin-top: 56px; max-width: 1460px; }
+[data-style="broadsheet"] .cols p { font-size: 25px; line-height: 1.55;
+    color: var(--muted); }
+[data-style="broadsheet"] .cols p:first-child { color: var(--ink); }
+
+/* 4 · Blueprint — a 60px grid, mono labels, a leader line ----------------- */
+[data-style="blueprint"] .grid-bg { position: absolute; inset: 0;
+    background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
+                      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 60px 60px; }
+[data-style="blueprint"] .kick { font-family: var(--font-mono); font-size: 21px;
+    letter-spacing: .14em; color: var(--muted); font-weight: 400; }
+[data-style="blueprint"] h1 { font-family: var(--font-display); font-size: 104px;
+    line-height: 1.06; font-weight: 500; letter-spacing: -.03em; margin-top: 30px;
+    max-width: 1280px; }
+[data-style="blueprint"] h1 u { text-decoration: none; color: var(--accent);
+    box-shadow: inset 0 -14px 0 var(--accent-soft); }
+[data-style="blueprint"] .callout { position: absolute; right: 130px; top: 300px;
+    width: 420px; font-family: var(--font-mono); font-size: 20px; line-height: 1.7;
+    color: var(--muted); border-left: 2px solid var(--accent); padding-left: 26px; }
+[data-style="blueprint"] .callout b { display: block; color: var(--ink);
+    font-size: 54px; font-weight: 500; margin-bottom: 10px; }
+
+/* 5 · Sunrise — organic shapes bleeding off the edge ---------------------- */
+[data-style="sunrise"] .bleed { position: absolute; inset: 0; overflow: hidden; }
+[data-style="sunrise"] .blob { position: absolute; border-radius: 50%;
+    filter: blur(.4px); }
+[data-style="sunrise"] .b1 { width: 860px; height: 860px; right: -230px;
+    top: -210px; background: var(--accent); opacity: .14; }
+[data-style="sunrise"] .b2 { width: 620px; height: 620px; right: 180px;
+    bottom: -300px; background: var(--accent-2); opacity: .16; }
+[data-style="sunrise"] .b3 { width: 300px; height: 300px; left: -120px;
+    bottom: 120px; background: var(--accent); opacity: .10; }
+[data-style="sunrise"] .pad { padding-right: 760px; }
+[data-style="sunrise"] h1 { font-family: var(--font-display); font-size: 110px;
+    line-height: 1.06; font-weight: 500; letter-spacing: -.02em; margin-top: 32px; }
+[data-style="sunrise"] h1 em { font-style: italic; color: var(--accent); }
+
+/* 6 · Graphite — one weight apart, one acid accent ------------------------ */
+[data-style="graphite"] .pad { justify-content: flex-end; padding-bottom: 180px; }
+[data-style="graphite"] .kick { color: var(--accent); font-size: 22px;
+    letter-spacing: .26em; font-weight: 600; }
+[data-style="graphite"] h1 { font-family: var(--font-display); font-size: 136px;
+    line-height: .98; font-weight: 900; letter-spacing: -.045em; margin-top: 40px;
+    max-width: 1520px; }
+[data-style="graphite"] h1 span { color: var(--accent); }
+[data-style="graphite"] .meta { display: flex; gap: 90px; margin-top: 70px; }
+[data-style="graphite"] .meta div { font-size: 22px; color: var(--muted);
+    font-weight: 400; }
+[data-style="graphite"] .meta b { display: block; color: var(--ink);
+    font-size: 46px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 6px; }
+
+/* 7 · Studio — flat blocks, hard edges, a cropped number ------------------ */
+[data-style="studio"] .blk { position: absolute; }
+[data-style="studio"] .k1 { left: 0; top: 0; width: 760px; height: 1080px;
+    background: var(--accent); }
+[data-style="studio"] .k2 { right: 0; top: 0; width: 1160px; height: 404px;
+    background: var(--accent-2); }
+[data-style="studio"] .num { position: absolute; left: 52px; bottom: 0;
+    width: 700px; height: 430px; overflow: hidden;
+    font-family: var(--font-display); font-size: 440px; font-weight: 800;
+    line-height: 1.02; letter-spacing: -.05em;
+    color: var(--on-accent); opacity: .26; }
+[data-style="studio"] .pad { padding-left: 860px; padding-top: 140px;
+    justify-content: flex-start; }
+[data-style="studio"] .kick { color: var(--ink); opacity: .9; }
+[data-style="studio"] h1 { font-family: var(--font-display); font-size: 108px;
+    line-height: 1.0; font-weight: 800; letter-spacing: -.03em; margin-top: 150px;
+    max-width: 900px; }
+[data-style="studio"] .sub { color: rgba(255,255,255,.76); max-width: 820px; }
+
+/* 8 · Clinic — no ornament but one rule ----------------------------------- */
+[data-style="clinic"] .kick { color: var(--muted); font-weight: 500;
+    font-size: 22px; letter-spacing: .18em; }
+[data-style="clinic"] h1 { font-family: var(--font-display); font-size: 96px;
+    line-height: 1.12; font-weight: 600; letter-spacing: -.028em; margin-top: 30px;
+    max-width: 1420px; }
+[data-style="clinic"] .accent-rule { width: 180px; height: 5px;
+    background: var(--accent); margin-top: 48px; }
+[data-style="clinic"] .facts { display: grid; grid-template-columns: repeat(3, 320px);
+    gap: 64px; margin-top: 64px; }
+[data-style="clinic"] .facts b { display: block; font-size: 58px; font-weight: 600;
+    letter-spacing: -.02em; color: var(--accent); }
+[data-style="clinic"] .facts span { display: block; font-size: 23px; line-height: 1.5;
+    color: var(--muted); margin-top: 10px; }
+
+
+.speaker-notes { display: none; }
+</style>
+</head>
+<body>
+
+<div class="deck-progress"></div>
+
+<div class="deck-viewport">
+  <main class="deck-stage" id="deckStage">
+
+  <!-- 1 ====================================================== Night Ride -->
+  <section class="slide active" data-style="night-ride">
+    <svg class="route" viewBox="0 0 1920 1080" preserveAspectRatio="none">
+      <path d="M -40 840 C 320 740, 560 980, 900 900 S 1520 660, 1980 790"/>
+      <circle cx="320" cy="805" r="9"/><circle cx="900" cy="900" r="9"/>
+    </svg>
+    <div class="pad">
+      <div class="kick reveal" style="--d:.05">Brand campaign &middot; Q1 2027</div>
+      <h1 class="reveal" style="--d:.15">Nobody remembers<em>the second message</em></h1>
+      <p class="sub reveal" style="--d:.3">One idea, four channels, measured in
+         recall rather than reach.</p>
+    </div>
+    <div class="foot reveal" style="--d:.45">Northwind &middot; Brand team</div>
+    <div class="speaker-notes">Preset: night-ride. Signature move: a dashed route
+      threading every slide at low opacity, in a different position each time.</div>
+  </section>
+
+  <!-- 2 ==================================================== Signal Brief -->
+  <section class="slide" data-style="signal-brief">
+    <div class="band">
+      <span><i></i>Prepared for the board<br>Circulated 14 February<br>
+        Commercially confidential</span>
+    </div>
+    <div class="pad">
+      <div class="kick reveal" style="--d:.05">Board paper &middot; 14 February 2027</div>
+      <div class="rule reveal" style="--d:.1"></div>
+      <h1 class="reveal" style="--d:.18">The merger pays for itself in the
+         <b>third year</b>, not the first</h1>
+      <p class="sub reveal" style="--d:.32">Integration cost lands early and the
+         revenue synergy lands late. The plan should say so.</p>
+    </div>
+    <div class="foot reveal" style="--d:.45">Lindgren Partners</div>
+    <div class="speaker-notes">Preset: signal-brief. Signature move: two surfaces
+      used deliberately, cream for analysis and navy for the break. Mono chrome.</div>
+  </section>
+
+  <!-- 3 ====================================================== Broadsheet -->
+  <section class="slide" data-style="broadsheet">
+    <div class="pad">
+      <div class="masthead reveal" style="--d:.05">
+        <span>Housing Review 2027</span><span>Section one &middot; Affordability</span>
+      </div>
+      <div class="heavy reveal" style="--d:.12"></div>
+      <h1 class="reveal" style="--d:.2">Rents outran wages in <mark>nineteen</mark>
+         of twenty cities</h1>
+      <div class="cols reveal" style="--d:.34">
+        <p>The gap widened fastest where construction had already stalled, which
+           rules out supply as the whole story.</p>
+        <p>Only one city closed the gap. It did so by changing what counts as
+           permitted density, not by building faster.</p>
+        <p>Every figure here comes from the same registry, so the cities can be
+           compared without adjustment.</p>
+      </div>
+    </div>
+    <div class="speaker-notes">Preset: broadsheet. Signature move: a heavy rule the
+      width of the column, and red used perhaps four times in a whole deck.</div>
+  </section>
+
+  <!-- 4 ======================================================= Blueprint -->
+  <section class="slide" data-style="blueprint">
+    <div class="grid-bg"></div>
+    <div class="pad">
+      <div class="kick reveal" style="--d:.05">System review / 2026-11</div>
+      <h1 class="reveal" style="--d:.16">Ninety percent of our latency
+         is <u>one queue</u></h1>
+      <p class="sub reveal" style="--d:.3">Everything downstream of it is already
+         fast enough. We have been optimising the wrong half.</p>
+    </div>
+    <div class="callout reveal" style="--d:.4">
+      <b>412 ms</b>median time a request spends waiting in the ingest queue,
+      against 44 ms for all remaining work
+    </div>
+    <div class="foot reveal" style="--d:.5">Platform group</div>
+    <div class="speaker-notes">Preset: blueprint. Signature move: a 60px grid with
+      content snapped to it visibly, and mono for every label and figure.</div>
+  </section>
+
+  <!-- 5 ========================================================= Sunrise -->
+  <section class="slide" data-style="sunrise">
+    <div class="bleed">
+      <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+    </div>
+    <div class="pad">
+      <div class="kick reveal" style="--d:.05">Retention study &middot; Spring</div>
+      <h1 class="reveal" style="--d:.16">Growth came from the customers
+         we <em>almost dropped</em></h1>
+      <p class="sub reveal" style="--d:.3">The accounts we scored lowest renewed
+         at the highest rate once someone called them.</p>
+    </div>
+    <div class="foot reveal" style="--d:.45">Customer research</div>
+    <div class="speaker-notes">Preset: sunrise. Signature move: large soft organic
+      shapes in clay and sage bleeding off the slide edge behind the content.</div>
+  </section>
+
+  <!-- 6 ======================================================== Graphite -->
+  <section class="slide" data-style="graphite">
+    <div class="pad">
+      <div class="kick reveal" style="--d:.05">Series A &middot; Confidential</div>
+      <h1 class="reveal" style="--d:.15">We are three weeks from
+         <span>running out of road.</span></h1>
+      <div class="meta reveal" style="--d:.32">
+        <div><b>11</b>weeks of runway</div>
+        <div><b>&euro;2.4m</b>asked</div>
+        <div><b>18&times;</b>pipeline cover</div>
+      </div>
+    </div>
+    <div class="speaker-notes">Preset: graphite. Signature move: one typeface across
+      the deck separated only by weight, and an acid accent on one element.</div>
+  </section>
+
+  <!-- 7 ========================================================== Studio -->
+  <section class="slide" data-style="studio">
+    <div class="blk k1"><div class="num">04</div></div>
+    <div class="blk k2"></div>
+    <div class="pad">
+      <div class="kick reveal" style="--d:.05">Chapter four</div>
+      <h1 class="reveal" style="--d:.16">Interfaces that argue back</h1>
+      <p class="sub reveal" style="--d:.3">What happens to a product when the
+         cheapest thing in it is an opinion.</p>
+    </div>
+    <div class="speaker-notes">Preset: studio. Signature move: two or three flat
+      colour panels meeting at hard edges, section numbers cropped by the edge.</div>
+  </section>
+
+  <!-- 8 ========================================================== Clinic -->
+  <section class="slide" data-style="clinic">
+    <div class="pad">
+      <div class="kick reveal" style="--d:.05">Phase II results</div>
+      <h1 class="reveal" style="--d:.15">The treatment works, and only for the
+         group we did not target</h1>
+      <div class="accent-rule reveal" style="--d:.26"></div>
+      <div class="facts reveal" style="--d:.36">
+        <div><b>+31%</b><span>response in the over-sixties</span></div>
+        <div><b>No effect</b><span>in the enrolled primary cohort</span></div>
+        <div><b>n = 1,204</b><span>across nine sites, two countries</span></div>
+      </div>
+    </div>
+    <div class="foot reveal" style="--d:.5">Nine-site collaborative trial</div>
+    <div class="speaker-notes">Preset: clinic. Signature move: deliberately none.
+      Hierarchy from size, weight and space, with one accent rule as the ornament.</div>
+  </section>
+
+  </main>
+</div>
+
+<script>
+/* ===========================================================================
+   DECK CONTROLLER — include this entire file in every HTML deck.
+
+   Navigation, stage scaling, presenting mode, presenter view, and the
+   behaviours shared by every component (counters, flips, tabs).
+   No dependencies.
+   =========================================================================== */
+
+class Deck {
+    constructor() {
+        this.slides = [...document.querySelectorAll('.slide')];
+        this.stage = document.getElementById('deckStage');
+        this.progress = document.querySelector('.deck-progress');
+        this.current = 0;
+        this.presenterWindow = null;
+
+        this.scale();
+        addEventListener('resize', () => this.scale());
+
+        this.bindKeys();
+        this.bindTouch();
+        this.bindWheel();
+        this.bindChrome();
+        this.bindFullscreen();
+
+        // Deep link: deck.html#7 opens on slide 7.
+        const fromHash = parseInt(location.hash.slice(1), 10);
+        this.show(Number.isInteger(fromHash) ? fromHash - 1 : 0);
+    }
+
+    /* --- Scale the 1920x1080 stage to fit the window, letterboxing ------- */
+    scale() {
+        const f = Math.min(innerWidth / 1920, innerHeight / 1080);
+        const x = (innerWidth - 1920 * f) / 2;
+        const y = (innerHeight - 1080 * f) / 2;
+        this.stage.style.transform = `translate(${x}px, ${y}px) scale(${f})`;
+    }
+
+    /* --- Slide switching ------------------------------------------------- */
+    show(i) {
+        this.current = Math.max(0, Math.min(i, this.slides.length - 1));
+
+        this.slides.forEach((s, n) => {
+            const on = n === this.current;
+            s.classList.toggle('active', on);
+            s.classList.toggle('visible', on);
+            s.setAttribute('aria-hidden', String(!on));
+        });
+
+        const counter = document.querySelector('.deck-controls .count');
+        if (counter) counter.textContent = `${this.current + 1} / ${this.slides.length}`;
+
+        if (this.progress) {
+            this.progress.style.width = ((this.current + 1) / this.slides.length * 100) + '%';
+        }
+
+        history.replaceState(null, '', '#' + (this.current + 1));
+
+        this.runCounters(this.slides[this.current]);
+        this.replayAnimations(this.slides[this.current]);
+        this.pushToPresenter();
+    }
+
+    next() { this.show(this.current + 1); }
+    prev() { this.show(this.current - 1); }
+
+    /* --- Numbers that count up on arrival --------------------------------
+       <span data-count="53.6" data-dec="1">0</span>
+       data-dec  decimal places, default 0
+       data-sep  set to "1" for thousands separators
+       --------------------------------------------------------------------- */
+    runCounters(slide) {
+        slide.querySelectorAll('[data-count]').forEach(el => {
+            const target = parseFloat(el.dataset.count);
+            const dec = parseInt(el.dataset.dec || 0, 10);
+            const sep = el.dataset.sep === '1';
+            const dur = parseInt(el.dataset.dur || 1300, 10);
+            const t0 = performance.now();
+
+            const tick = t => {
+                const p = Math.min((t - t0) / dur, 1);
+                const eased = 1 - Math.pow(1 - p, 3);
+                const v = (target * eased).toFixed(dec);
+                el.textContent = sep ? Number(v).toLocaleString(undefined, {
+                    minimumFractionDigits: dec, maximumFractionDigits: dec
+                }) : v;
+                if (p < 1) requestAnimationFrame(tick);
+            };
+
+            requestAnimationFrame(tick);
+        });
+    }
+
+    /* --- Restart keyframe animations when a slide is revisited ----------- */
+    replayAnimations(slide) {
+        slide.querySelectorAll('[data-replay]').forEach(el => {
+            el.style.animation = 'none';
+            void el.offsetWidth;          // force reflow
+            el.style.animation = '';
+        });
+    }
+
+    /* --- Input ------------------------------------------------------------ */
+    bindKeys() {
+        addEventListener('keydown', e => {
+            if (e.target.isContentEditable || /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+
+            if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(e.key)) {
+                e.preventDefault(); this.next();
+            } else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) {
+                e.preventDefault(); this.prev();
+            } else if (e.key === 'Home') {
+                e.preventDefault(); this.show(0);
+            } else if (e.key === 'End') {
+                e.preventDefault(); this.show(this.slides.length - 1);
+            } else if (e.key === 'f' || e.key === 'F') {
+                e.preventDefault(); this.toggleFullscreen();
+            } else if (e.key === 'p' || e.key === 'P') {
+                e.preventDefault(); this.openPresenter();
+            }
+        });
+    }
+
+    bindTouch() {
+        let x0 = null, y0 = null;
+
+        addEventListener('touchstart', e => {
+            x0 = e.touches[0].clientX;
+            y0 = e.touches[0].clientY;
+        }, { passive: true });
+
+        addEventListener('touchend', e => {
+            if (x0 === null) return;
+            const dx = e.changedTouches[0].clientX - x0;
+            const dy = e.changedTouches[0].clientY - y0;
+            // Horizontal intent only, so vertical scrolling inside a slide still works.
+            if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+                dx < 0 ? this.next() : this.prev();
+            }
+            x0 = y0 = null;
+        }, { passive: true });
+    }
+
+    bindWheel() {
+        let lock = false;
+        addEventListener('wheel', e => {
+            if (lock) return;
+            if (Math.abs(e.deltaY) < 24 && Math.abs(e.deltaX) < 24) return;
+            lock = true;
+            (e.deltaY || e.deltaX) > 0 ? this.next() : this.prev();
+            setTimeout(() => lock = false, 650);
+        }, { passive: true });
+    }
+
+    bindChrome() {
+        const prev = document.querySelector('[data-nav="prev"]');
+        const next = document.querySelector('[data-nav="next"]');
+        const full = document.querySelector('[data-nav="fullscreen"]');
+        if (prev) prev.onclick = () => this.prev();
+        if (next) next.onclick = () => this.next();
+        if (full) full.onclick = () => this.toggleFullscreen();
+    }
+
+    /* --- Presenting mode: fullscreen, chrome hides after 2.5s idle -------- */
+    bindFullscreen() {
+        let timer = null;
+
+        const poke = () => {
+            document.body.classList.add('show-chrome');
+            clearTimeout(timer);
+            timer = setTimeout(() => document.body.classList.remove('show-chrome'), 2500);
+        };
+
+        const onChange = () => {
+            const on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+            document.body.classList.toggle('presenting', on);
+            this.scale();
+            on ? poke() : document.body.classList.remove('show-chrome');
+        };
+
+        document.addEventListener('fullscreenchange', onChange);
+        document.addEventListener('webkitfullscreenchange', onChange);
+        addEventListener('mousemove', () => {
+            if (document.body.classList.contains('presenting')) poke();
+        });
+    }
+
+    toggleFullscreen() {
+        const el = document.documentElement;
+        const isFull = document.fullscreenElement || document.webkitFullscreenElement;
+        try {
+            const fn = isFull
+                ? (document.exitFullscreen || document.webkitExitFullscreen)
+                : (el.requestFullscreen || el.webkitRequestFullscreen);
+            const p = fn && fn.call(isFull ? document : el);
+            if (p && p.catch) p.catch(() => {});
+        } catch (_) { /* fullscreen unavailable, not fatal */ }
+    }
+
+    /* --- Presenter view: notes, next slide and a timer in a second window -
+       Press P. Put it on the laptop screen, the deck on the projector.
+       --------------------------------------------------------------------- */
+    openPresenter() {
+        if (this.presenterWindow && !this.presenterWindow.closed) {
+            this.presenterWindow.focus();
+            return;
+        }
+
+        this.presenterWindow = open('', 'presenter', 'width=900,height=620');
+        if (!this.presenterWindow) return;   // popup blocked
+
+        this.presenterWindow.document.write(`<!DOCTYPE html><meta charset="utf-8">
+<title>Presenter view</title>
+<style>
+  body{margin:0;padding:28px;background:#111;color:#eee;
+       font:16px/1.55 system-ui,sans-serif;display:grid;gap:22px;
+       grid-template-rows:auto auto 1fr}
+  .row{display:flex;justify-content:space-between;align-items:baseline;
+       border-bottom:1px solid #333;padding-bottom:12px}
+  .pos{font-size:15px;color:#888;letter-spacing:.06em}
+  .timer{font-size:34px;font-variant-numeric:tabular-nums}
+  h2{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:#888;
+     font-weight:600;margin-bottom:8px}
+  .notes{font-size:19px;white-space:pre-wrap}
+  .next{color:#aaa;font-size:17px}
+</style>
+<div class="row"><span class="pos" id="pos"></span><span class="timer" id="timer">00:00</span></div>
+<div><h2>Notes</h2><div class="notes" id="notes"></div></div>
+<div><h2>Up next</h2><div class="next" id="next"></div></div>
+<script>
+  const t0 = Date.now();
+  setInterval(() => {
+    const s = Math.floor((Date.now() - t0) / 1000);
+    document.getElementById('timer').textContent =
+      String(Math.floor(s / 60)).padStart(2,'0') + ':' + String(s % 60).padStart(2,'0');
+  }, 1000);
+<\/script>`);
+        this.presenterWindow.document.close();
+        this.pushToPresenter();
+    }
+
+    pushToPresenter() {
+        const w = this.presenterWindow;
+        if (!w || w.closed || !w.document.getElementById('pos')) return;
+
+        const notesEl = this.slides[this.current].querySelector('.speaker-notes');
+        const nextSlide = this.slides[this.current + 1];
+        const nextHead = nextSlide && nextSlide.querySelector('h1, h2, .headline');
+
+        w.document.getElementById('pos').textContent =
+            `Slide ${this.current + 1} of ${this.slides.length}`;
+        w.document.getElementById('notes').textContent =
+            notesEl ? notesEl.textContent.trim() : 'No notes for this slide.';
+        w.document.getElementById('next').textContent =
+            nextHead ? nextHead.textContent.trim() : 'End of deck.';
+    }
+}
+
+/* ===========================================================================
+   SHARED COMPONENT BEHAVIOUR
+   Markup conventions live in references/components/interactive.md
+   =========================================================================== */
+
+/* Flip cards: <div class="flip"><div class="flip-inner">…</div></div> */
+function bindFlipCards() {
+    document.querySelectorAll('.flip').forEach(card => {
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('role', 'button');
+
+        const toggle = () => card.classList.toggle('flipped');
+        card.addEventListener('click', toggle);
+        card.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+        });
+    });
+}
+
+/* Tab switchers: buttons carry data-tab="x", panels carry data-panel="x".
+   Scoped per .tab-group so several can coexist on one slide. */
+function bindTabs() {
+    document.querySelectorAll('.tab-group').forEach(group => {
+        const tabs = [...group.querySelectorAll('[data-tab]')];
+        const panels = [...group.querySelectorAll('[data-panel]')];
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => {
+                    const on = t === tab;
+                    t.classList.toggle('on', on);
+                    t.setAttribute('aria-selected', String(on));
+                });
+                panels.forEach(p => p.classList.toggle('on', p.dataset.panel === tab.dataset.tab));
+            });
+        });
+    });
+}
+
+/* Charts with hoverable segments. The centre readout swaps to the hovered
+   segment's value and returns to the default on leave. */
+function bindChartHovers() {
+    document.querySelectorAll('[data-chart-hover]').forEach(chart => {
+        const big = chart.querySelector('[data-readout-value]');
+        const sub = chart.querySelector('[data-readout-label]');
+        if (!big || !sub) return;
+
+        const rest = { big: big.innerHTML, sub: sub.innerHTML };
+
+        chart.querySelectorAll('[data-value]').forEach(seg => {
+            seg.addEventListener('mouseenter', () => {
+                chart.classList.add('hovering');
+                big.textContent = seg.dataset.value;
+                sub.textContent = seg.dataset.label || '';
+            });
+            seg.addEventListener('mouseleave', () => {
+                chart.classList.remove('hovering');
+                big.innerHTML = rest.big;
+                sub.innerHTML = rest.sub;
+            });
+        });
+    });
+}
+
+/* Carousels: <div class="carousel" data-carousel> with [data-carousel-item],
+   [data-carousel-prev], [data-carousel-next], [data-carousel-dots] */
+function bindCarousels() {
+    document.querySelectorAll('[data-carousel]').forEach(car => {
+        const items = [...car.querySelectorAll('[data-carousel-item]')];
+        const dots = car.querySelector('[data-carousel-dots]');
+        if (!items.length) return;
+        let i = 0;
+
+        if (dots && !dots.children.length) {
+            items.forEach(() => dots.appendChild(document.createElement('i')));
+        }
+
+        const render = () => {
+            items.forEach((el, n) => el.classList.toggle('on', n === i));
+            if (dots) [...dots.children].forEach((d, n) => d.classList.toggle('on', n === i));
+        };
+
+        const go = step => { i = (i + step + items.length) % items.length; render(); };
+
+        const prev = car.querySelector('[data-carousel-prev]');
+        const next = car.querySelector('[data-carousel-next]');
+        if (prev) prev.onclick = () => go(-1);
+        if (next) next.onclick = () => go(1);
+
+        render();
+    });
+}
+
+/* ===========================================================================
+   INLINE EDITING
+
+   Press E, or hover the top-left corner, to edit text directly in the deck.
+   Changes save to this browser automatically. "Save a copy" downloads an HTML
+   file with the edits baked in.
+
+   Purpose: fixing a typo or rewording a headline should not cost a round trip
+   back to the agent.
+   =========================================================================== */
+
+class Editor {
+    constructor(deck) {
+        this.deck = deck;
+        this.active = false;
+        this.key = 'deck-edits:' + location.pathname;
+
+        this.toggle = document.getElementById('editToggle');
+        this.hotzone = document.querySelector('.edit-hotzone');
+
+        this.index();
+        this.restore();
+        this.bind();
+        this.announce();
+    }
+
+    /* The pencil is invisible until you hover an unmarked corner, which means
+       nobody discovers editing exists. Show it briefly on load, once, with a
+       dismissible hint. */
+    announce() {
+        if (!this.toggle) return;
+        this.toggle.classList.add('show');
+        setTimeout(() => { if (!this.active) this.toggle.classList.remove('show'); }, 4000);
+
+        let seen = false;
+        try { seen = localStorage.getItem(this.key + ':hinted') === '1'; } catch (_) {}
+        if (seen) return;
+
+        const hint = document.createElement('div');
+        hint.className = 'edit-hint';
+        hint.innerHTML = '<b>E</b> to edit any text on this deck';
+        document.body.appendChild(hint);
+
+        const dismiss = () => {
+            hint.classList.add('gone');
+            setTimeout(() => hint.remove(), 400);
+            try { localStorage.setItem(this.key + ':hinted', '1'); } catch (_) {}
+        };
+        hint.addEventListener('click', dismiss);
+        setTimeout(dismiss, 6000);
+    }
+
+    /* Stable ids so saved edits survive a reload. Index within the slide, so
+       adding a slide later does not shift everything.
+
+       A field is an element whose children are only inline formatting. Headlines
+       routinely carry <em> or <b> for emphasis, and excluding them would make
+       the most important text on the deck the only text you cannot edit. */
+    index() {
+        const SELECTOR = 'h1,h2,h3,h4,p,li,blockquote,td,th,figcaption,div,span';
+        const INLINE = new Set(['EM', 'B', 'STRONG', 'I', 'U', 'SMALL', 'SPAN',
+                                'BR', 'SUB', 'SUP', 'MARK', 'CODE', 'ABBR']);
+        this.fields = [];
+
+        const inlineOnly = el =>
+            [...el.children].every(c => INLINE.has(c.tagName) && inlineOnly(c));
+
+        this.deck.slides.forEach((slide, s) => {
+            let n = 0;
+            slide.querySelectorAll(SELECTOR).forEach(el => {
+                if (!(el.textContent || '').trim()) return;
+                if (el.closest('.speaker-notes, .deck-controls')) return;
+                if (el.querySelector('[data-count]') || el.hasAttribute('data-count')) return;
+                if (!inlineOnly(el)) return;                    // has block children
+                if (el.closest('[data-edit-id]')) return;       // already inside a field
+                el.dataset.editId = `s${s}-f${n++}`;
+                el.dataset.editRich = el.children.length ? '1' : '';
+                this.fields.push(el);
+            });
+        });
+    }
+
+    bind() {
+        if (this.toggle) this.toggle.addEventListener('click', () => this.flip());
+
+        // Hover reveal needs JS with a grace period. A CSS sibling selector
+        // fails here: pointer-events:none on the button breaks the hover chain
+        // the moment the cursor leaves the hotzone heading for the button.
+        if (this.hotzone && this.toggle) {
+            let hideTimer = null;
+            const show = () => { clearTimeout(hideTimer); this.toggle.classList.add('show'); };
+            const hide = () => {
+                hideTimer = setTimeout(() => {
+                    if (!this.active) this.toggle.classList.remove('show');
+                }, 400);
+            };
+            this.hotzone.addEventListener('mouseenter', show);
+            this.hotzone.addEventListener('mouseleave', hide);
+            this.toggle.addEventListener('mouseenter', show);
+            this.toggle.addEventListener('mouseleave', hide);
+        }
+
+        addEventListener('keydown', e => {
+            if ((e.key === 'e' || e.key === 'E') && !e.target.isContentEditable) {
+                e.preventDefault();
+                this.flip();
+            }
+            if (e.key === 'Escape' && this.active) this.flip();
+            if (this.active && (e.metaKey || e.ctrlKey) && e.key === 's') {
+                e.preventDefault();
+                this.download();
+            }
+        });
+    }
+
+    flip() { this.active ? this.stop() : this.start(); }
+
+    start() {
+        this.active = true;
+        document.body.classList.add('editing');
+        if (this.toggle) { this.toggle.classList.add('show', 'active'); this.toggle.textContent = '✕'; }
+
+        this.fields.forEach(el => {
+            // Rich fields keep their <em>/<b>; plain ones are locked to text so
+            // a paste cannot inject markup into the slide.
+            el.setAttribute('contenteditable', el.dataset.editRich ? 'true' : 'plaintext-only');
+            el.addEventListener('input', this.save);
+        });
+
+        this.bar = document.createElement('div');
+        this.bar.className = 'edit-bar';
+        this.bar.innerHTML = '<span>Click any text to edit</span>' +
+            '<button data-edit="save">Save a copy</button>' +
+            '<button data-edit="reset">Undo all</button>' +
+            '<button data-edit="done">Done</button>';
+        document.body.appendChild(this.bar);
+
+        this.bar.addEventListener('click', e => {
+            const what = e.target.dataset.edit;
+            if (what === 'save') this.download();
+            if (what === 'reset') this.reset();
+            if (what === 'done') this.stop();
+        });
+    }
+
+    stop() {
+        this.active = false;
+        document.body.classList.remove('editing');
+        if (this.toggle) { this.toggle.classList.remove('active'); this.toggle.textContent = '✎'; }
+
+        this.fields.forEach(el => {
+            el.removeAttribute('contenteditable');
+            el.removeEventListener('input', this.save);
+        });
+
+        if (this.bar) { this.bar.remove(); this.bar = null; }
+    }
+
+    save = () => {
+        const edits = {};
+        this.fields.forEach(el => {
+            edits[el.dataset.editId] = el.dataset.editRich ? el.innerHTML : el.textContent;
+        });
+        try {
+            localStorage.setItem(this.key, JSON.stringify(edits));
+        } catch (_) {
+            // Private browsing, or storage full. Editing still works for this
+            // session; "Save a copy" is the way out.
+            this.warnNoStorage();
+        }
+    };
+
+    warnNoStorage() {
+        if (this.warned || !this.bar) return;
+        this.warned = true;
+        this.bar.querySelector('span').textContent =
+            'This browser will not save edits. Use "Save a copy" before closing.';
+    }
+
+    restore() {
+        let edits;
+        try { edits = JSON.parse(localStorage.getItem(this.key) || '{}'); } catch (_) { return; }
+        this.fields.forEach(el => {
+            const saved = edits[el.dataset.editId];
+            if (saved === undefined) return;
+            if (el.dataset.editRich) {
+                if (saved !== el.innerHTML) el.innerHTML = saved;
+            } else if (saved !== el.textContent) {
+                el.textContent = saved;
+            }
+        });
+    }
+
+    reset() {
+        try { localStorage.removeItem(this.key); } catch (_) {}
+        location.reload();
+    }
+
+    /* Writes out the live DOM, minus editing chrome, so the downloaded file is
+       a clean deck with the edits baked in. */
+    download() {
+        const clone = document.documentElement.cloneNode(true);
+        clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+        clone.querySelectorAll('.edit-bar').forEach(el => el.remove());
+        clone.querySelectorAll('.slide').forEach(el => {
+            el.classList.remove('visible');
+            el.style.visibility = '';
+        });
+        const first = clone.querySelector('.slide');
+        if (first) first.classList.add('active');
+
+        const html = '<!DOCTYPE html>\n' + clone.outerHTML;
+        const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+        const a = document.createElement('a');
+        const name = (location.pathname.split('/').pop() || 'deck.html').replace(/\.html?$/, '');
+        a.href = url;
+        a.download = `${name}-edited.html`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+}
+
+/* --- Boot ---------------------------------------------------------------- */
+const deck = new Deck();
+bindFlipCards();
+bindTabs();
+bindChartHovers();
+bindCarousels();
+const editor = new Editor(deck);
+
+</script>
+</body>
+</html>

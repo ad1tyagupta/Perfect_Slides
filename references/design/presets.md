@@ -25,6 +25,10 @@ sans carries the substance.
 ```
 Fonts: Fraunces + Satoshi. Safe: Georgia + Calibri.
 
+Satoshi comes from Fontshare, not Google Fonts, so a deck that only links
+Google Fonts will silently fall back. Either add the Fontshare stylesheet, or
+use Karla, which is what `examples/checkout-recovery.html` does.
+
 **Signature move.** A dashed line drawn in the accent colour threads across every
 slide at low opacity, in a different position each time. It reads as a route, a
 timeline, a current. One idea repeated is what makes a deck feel authored.

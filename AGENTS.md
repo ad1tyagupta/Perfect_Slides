@@ -149,6 +149,11 @@ Load only what the job needs.
 | `writing/languages.md` | Any deck not in English |
 | `requirements.txt` | A script reports a missing dependency |
 
+`scripts/shoot_deck.py` renders PNG stills of every slide and an optional
+animated GIF. Reach for it when the user wants images of the deck rather than
+the deck: a README, a handout, a thumbnail, a message to someone who will not
+open an attachment. It hides the deck's own navigation unless asked not to.
+
 ---
 
 ## Navigation built into every HTML deck

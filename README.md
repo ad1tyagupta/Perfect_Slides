@@ -7,6 +7,8 @@ editable PowerPoint file, or both.
 Works with any coding agent that can read files and run scripts. Claude Code,
 Codex, Cursor, Antigravity, Windsurf and anything else that reads `AGENTS.md`.
 
+![Four slides from the example deck, animating](docs/images/deck-motion.gif)
+
 ---
 
 ## What it does
@@ -34,9 +36,40 @@ Codex, Cursor, Antigravity, Windsurf and anything else that reads `AGENTS.md`.
 
 ## See it first
 
-`examples/` holds the same nine-slide consulting deck in both formats. Open
+Everything below was rendered straight from the files in `examples/` by
+`scripts/shoot_deck.py`. No mock-ups, no screenshots of something else.
+
+| | |
+|---|---|
+| ![Title slide: Checkout is where the revenue leaks](docs/images/deck-01.png) | ![Line chart showing abandonment rising after a March release](docs/images/deck-04.png) |
+| ![Donut chart splitting three weeks of work](docs/images/deck-06.png) | ![Three-week delivery timeline](docs/images/deck-08.png) |
+
+`examples/` holds that nine-slide consulting deck in both formats. Open
 `checkout-recovery.html` in a browser, then open `checkout-recovery.pptx` in
 PowerPoint and click a chart to edit its data.
+
+---
+
+## Eight built-in styles
+
+Every preset in `references/design/presets.md`, rendered as the title slide of a
+different deck. Same stage, same components, eight different arguments about what
+a slide should be. Open `examples/style-previews.html` and use the arrow keys to
+flick between them.
+
+When you ask for a deck, the agent shortlists two or three of these and renders
+you real title slides to choose from. You pick by looking, not by describing an
+aesthetic in words.
+
+| | |
+|---|---|
+| ![Night Ride](docs/images/style-night-ride.png)<br>**Night Ride** · dark<br>Deep navy canvas, one electric accent, editorial serif against geometric sans. | ![Signal Brief](docs/images/style-signal-brief.png)<br>**Signal Brief** · light<br>Warm paper and deep navy, a single antique gold accent, serif throughout. |
+| ![Broadsheet](docs/images/style-broadsheet.png)<br>**Broadsheet** · light<br>White page, black type, one red mark. Newspaper structure at slide scale. | ![Blueprint](docs/images/style-blueprint.png)<br>**Blueprint** · light<br>Cool grey ground, a fine technical grid, monospace labels on humanist body. |
+| ![Sunrise](docs/images/style-sunrise.png)<br>**Sunrise** · light<br>Warm cream, terracotta and clay, humanist type with generous space. | ![Graphite](docs/images/style-graphite.png)<br>**Graphite** · dark<br>Near-black surface, one hot accent, tight grotesque, ruthless hierarchy. |
+| ![Studio](docs/images/style-studio.png)<br>**Studio** · mixed<br>Full-bleed colour blocks, oversized type, hard edges, no shadows anywhere. | ![Clinic](docs/images/style-clinic.png)<br>**Clinic** · light<br>White ground, restrained blue-grey, precise spacing, nothing decorative. |
+
+Twenty more are company styles, in `references/design/brand-index.json`, for when
+a deck has to look like it came from a particular firm.
 
 ---
 
@@ -79,6 +112,7 @@ exits with the install command if it is missing.
 | `build_pptx.py` | `python-pptx` |
 | `ingest.py` | `python-pptx`, `pypdf`, `python-docx`, `openpyxl` |
 | `verify_deck.py` | `playwright`, plus `playwright install chromium` |
+| `shoot_deck.py` | `playwright`, and `ffmpeg` for `--gif` only |
 | `process_images.py` | `Pillow` |
 | `embed_fonts.py` | nothing |
 | `deploy.sh` | Node, for Vercel's CLI |
@@ -187,10 +221,14 @@ scripts/
   build_pptx.py       deck.json to editable .pptx
   ingest.py           PDF/DOCX/PPTX/XLSX to structured JSON
   verify_deck.py      catches broken slides before delivery
+  shoot_deck.py       PNG stills of every slide, and an animated GIF
+  build_style_previews.py  rebuilds examples/style-previews.html
   embed_fonts.py      bakes fonts in so a deck works offline
   process_images.py   shrinks oversized images, flags soft ones
   deploy.sh           puts a deck on a live URL
 templates/            drop reference decks here
+examples/             a full deck in both formats, and the style previews
+docs/images/          what the README shows, all of it generated
 requirements.txt
 ```
 
