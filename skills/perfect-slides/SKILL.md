@@ -1,6 +1,8 @@
 ---
 name: perfect-slides
 description: Build presentations as animated HTML decks or editable PowerPoint files. Use when the user wants to create a presentation, pitch deck, slide deck, consulting deck, or talk, convert a PDF/Word/PowerPoint document into slides, or improve an existing deck. Handles research, writing, design and export.
+user-invocable: true
+argument-hint: [what the deck is about]
 ---
 
 # Perfect Slides
@@ -8,7 +10,8 @@ description: Build presentations as animated HTML decks or editable PowerPoint f
 This skill is a thin pointer. Everything lives in plain files so the tool works
 in any coding agent, not only this one.
 
-**Read `AGENTS.md` at the repository root now**, then follow it.
+**Read `${CLAUDE_PLUGIN_ROOT}/AGENTS.md` now**, then follow it. Every path it
+names is relative to `${CLAUDE_PLUGIN_ROOT}`.
 
 It routes to:
 
@@ -19,6 +22,14 @@ It routes to:
 - `references/components/` — what can go on a slide
 - `references/output/` — building HTML or PowerPoint
 - `scripts/` — pptx builder, document ingest, deck checker
+
+Scripts run from the plugin directory, with the deck written into the user's own
+working directory:
+
+```
+python ${CLAUDE_PLUGIN_ROOT}/scripts/build_pptx.py deck.json out.pptx
+python ${CLAUDE_PLUGIN_ROOT}/scripts/verify_deck.py deck.html --shots ./shots
+```
 
 ## The rules that matter most
 

@@ -42,7 +42,20 @@ PowerPoint and click a chart to edit its data.
 
 ## Install
 
-Clone it next to your project, or into it:
+**Claude Code** — two commands, nothing to clone:
+
+```bash
+/plugin marketplace add ad1tyagupta/Perfect_Slides
+```
+
+```bash
+/plugin install perfect-slides@perfect-slides
+```
+
+Then run `/perfect-slides`, or just ask for a deck in plain words.
+
+**Any other agent** — Codex, Cursor, Antigravity, Windsurf, or anything that
+reads `AGENTS.md`. Clone it next to your project, or into it:
 
 ```bash
 git clone https://github.com/ad1tyagupta/Perfect_Slides.git
@@ -51,9 +64,6 @@ git clone https://github.com/ad1tyagupta/Perfect_Slides.git
 Then tell your agent:
 
 > Read Perfect_Slides/AGENTS.md and build me a presentation.
-
-For Claude Code, the skill in `.claude/skills/` is picked up automatically when
-this repo sits in your working directory.
 
 Nothing is needed to build an HTML deck by hand. The scripts need Python:
 
@@ -163,6 +173,8 @@ type too small to read, fonts that failed to load.
 
 ```
 AGENTS.md                    entry point, read by any agent
+.claude-plugin/              plugin and marketplace manifests
+skills/perfect-slides/       Claude Code skill, points at AGENTS.md
 references/
   workflow/    intake · research · ingest
   narrative/   index · nine deck types · scenarios

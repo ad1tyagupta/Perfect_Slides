@@ -1,0 +1,25 @@
+{
+  "name": "perfect-slides",
+  "owner": {
+    "name": "Aditya Gupta",
+    "url": "https://github.com/ad1tyagupta"
+  },
+  "metadata": {
+    "description": "Marketplace hosting the Perfect Slides presentation plugin."
+  },
+  "plugins": [
+    {
+      "name": "perfect-slides",
+      "description": "Turn research into decision-ready decks. Animated single-file HTML presentations or real editable .pptx with native charts, nine deck structures, twenty brand styles, and a checker that catches broken slides before you see them.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Aditya Gupta",
+        "url": "https://github.com/ad1tyagupta"
+      },
+      "source": "./",
+      "category": "productivity",
+      "homepage": "https://github.com/ad1tyagupta/Perfect_Slides",
+      "tags": ["presentations", "slides", "pitch-deck", "powerpoint", "pptx", "html", "design"]
+    }
+  ]
+}

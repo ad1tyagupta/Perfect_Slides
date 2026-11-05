@@ -1,0 +1,24 @@
+{
+  "name": "perfect-slides",
+  "version": "0.1.0",
+  "description": "Turn research into decision-ready decks. Animated single-file HTML presentations or real editable .pptx with native charts, nine deck structures, twenty brand styles, and a checker that catches broken slides before you see them.",
+  "author": {
+    "name": "Aditya Gupta",
+    "url": "https://github.com/ad1tyagupta"
+  },
+  "homepage": "https://github.com/ad1tyagupta/Perfect_Slides",
+  "repository": "https://github.com/ad1tyagupta/Perfect_Slides",
+  "license": "MIT",
+  "keywords": [
+    "presentations",
+    "slides",
+    "pitch-deck",
+    "consulting-deck",
+    "powerpoint",
+    "pptx",
+    "html",
+    "design",
+    "data-visualization",
+    "research"
+  ]
+}
